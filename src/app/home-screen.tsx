@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen01, Zap } from "@untitledui/icons";
+import { BookOpen01, Zap, PlayCircle } from "@untitledui/icons";
 import { ConfigForm } from "../components/exam/config-form";
 import { ExamHistory } from "../components/exam/exam-history";
 import { useExamStore } from "../store/use-exam-store";
@@ -8,6 +8,7 @@ import { FeaturedIcon } from "../components/foundations/featured-icon/featured-i
 import { ThemeToggle } from "../components/foundations/theme-toggle";
 import { UntitledLogoMinimal } from "../components/foundations/logo/untitledui-logo-minimal";
 import { Badge } from "../components/base/badges/badges";
+import { Button } from "@/components/base/buttons/button";
 
 export const HomeScreen = () => {
     const exams = useExamStore((state) => state.exams);
@@ -29,7 +30,7 @@ export const HomeScreen = () => {
 
             <main className="relative flex flex-1 flex-col items-center">
                 {/* Hero & Config Form */}
-                <section className="mx-auto flex w-full max-w-container flex-col items-center justify-center gap-12 py-16 lg:flex-row lg:items-start lg:justify-between lg:px-8 lg:py-24">
+                <section className="mx-auto flex w-full max-w-container flex-col items-center justify-center gap-12 lg:py-16 lg:flex-row lg:items-start lg:justify-between lg:px-8 lg:py-24">
                     <div className="flex max-w-xl flex-col gap-6 text-center lg:text-left">
                         <div className="flex justify-center lg:justify-start">
                             <FeaturedIcon icon={Zap} color="brand" theme="light" size="lg" />
@@ -54,6 +55,8 @@ export const HomeScreen = () => {
                                 <span>AI Generated</span>
                             </div>
                         </div>
+
+                        <Button className="w-fit mx-auto px-12 md:hidden" iconLeading={PlayCircle}>Start</Button>
                     </div>
 
                     <div className="z-10 w-full lg:max-w-md flex w-full justify-center">
