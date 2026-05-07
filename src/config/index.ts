@@ -1,4 +1,4 @@
-export const AI_PROVIDER = process.env.AI_PROVIDER || "gemini";
+export const AI_PROVIDER = process.env.AI_PROVIDER || "groq";
 export const AI_MODEL_NAME = process.env.AI_MODEL_NAME;
 
 // API Keys (Server Only)
