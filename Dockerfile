@@ -1,51 +1,35 @@
-# Check for Node.js version
+# 1. Base image
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
+# 2. Dependencies
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-
-# Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Rebuild the source code only when needed
+# 3. Builder
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
-
-# Provide build-time env if needed (or use Runtime env in Cloud Run)
-# ARG GEMINI_API_KEY
-# ENV GEMINI_API_KEY=$GEMINI_API_KEY
-
+# Kita tidak perlu .env saat build untuk Server-side variables
 RUN npm run build
 
-# Production image, copy all the files and run next
+# 4. Runner (Image Akhir yang Kecil)
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV PORT 8080
+ENV HOSTNAME "0.0.0.0"
 
+# Buat user non-root untuk keamanan
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Copy file yang diperlukan saja dari builder
 COPY --from=builder /app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
@@ -53,9 +37,5 @@ USER nextjs
 
 EXPOSE 8080
 
-ENV PORT 8080
-# set hostname to 0.0.0.0 to allow external access
-ENV HOSTNAME "0.0.0.0"
-
-# server.js is created by next build from the standalone output
+# Next.js standalone menghasilkan server.js
 CMD ["node", "server.js"]

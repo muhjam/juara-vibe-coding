@@ -1,6 +1,7 @@
 node_modules
 .next
 .git
+.env.production
 .env.local
 .env
 .DS_Store
