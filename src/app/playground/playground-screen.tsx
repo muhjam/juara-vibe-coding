@@ -290,7 +290,8 @@ export const PlaygroundScreen = () => {
                                 <div className="flex flex-col gap-6">
                                     <div className="text-md md:text-lg font-medium text-primary leading-relaxed">
                                         {(() => {
-                                            const parts = currentQuestion.description.split(/\[blank\]/g);
+                                            // Split by [blank] OR a sequence of 3 or more underscores
+                                            const parts = currentQuestion.description.split(/\[blank\]|_{3,}/g);
                                             if (parts.length === 1) return <Markdown content={currentQuestion.description} />;
                                             
                                             // Handle multiple blanks
