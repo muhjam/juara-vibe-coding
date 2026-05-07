@@ -47,9 +47,23 @@ interface AlertFloatingProps {
      * The function to call when the confirm button is clicked.
      */
     onConfirm?: () => void;
+    /**
+     * Whether to hide the footer actions.
+     * @default false
+     */
+    hideFooterActions?: boolean;
 }
 
-export const AlertFloating = ({ title, description, confirmLabel, onClose, onConfirm, color = "default", dismissLabel = "Dismiss" }: AlertFloatingProps) => {
+export const AlertFloating = ({ 
+    title, 
+    description, 
+    confirmLabel, 
+    onClose, 
+    onConfirm, 
+    color = "default", 
+    dismissLabel = "Dismiss",
+    hideFooterActions = false
+}: AlertFloatingProps) => {
     return (
         <div className="relative flex flex-col gap-4 rounded-xl border border-primary bg-primary_alt p-4 shadow-xs md:flex-row">
             <FeaturedIcon icon={iconMap[color]} color={color === "default" ? "gray" : color} theme={color === "default" ? "modern" : "outline"} size="md" />
@@ -60,7 +74,7 @@ export const AlertFloating = ({ title, description, confirmLabel, onClose, onCon
                     <p className="text-sm text-tertiary md:truncate">{description}</p>
                 </div>
 
-                {(onConfirm || onClose) && (
+                {!hideFooterActions && (onConfirm || onClose) && (
                     <div className="flex gap-3">
                         {onClose && (
                             <Button onClick={onClose} size="sm" color="link-gray">

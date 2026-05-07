@@ -4,7 +4,8 @@ import { RouteProvider } from "../providers/router-provider";
 import { Theme } from "../providers/theme";
 import "../styles/globals.css";
 import { cx } from "../utils/cx";
-import { Toaster } from "../components/application/notifications/toaster";
+import { ToastProvider } from "../contexts/use-toast";
+import { GlobalToast } from "../components/application/notifications/global-toast";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -35,8 +36,10 @@ export default function RootLayout({
             <body className={cx(inter.variable, "bg-primary antialiased")}>
                 <RouteProvider>
                     <Theme>
-                        {children}
-                        <Toaster />
+                        <ToastProvider>
+                            {children}
+                            <GlobalToast />
+                        </ToastProvider>
                     </Theme>
                 </RouteProvider>
             </body>

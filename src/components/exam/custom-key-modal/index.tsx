@@ -6,7 +6,7 @@ import { Modal } from "@/components/shared-assets/modal";
 import { Input } from "@/components/base/input/input";
 import { Button } from "@/components/base/buttons/button";
 import { Key01, CheckCircle, Trash01, ArrowUpRight } from "@untitledui/icons";
-import { toast } from "sonner";
+import { useToast } from "@/contexts/use-toast";
 
 interface CustomKeyModalProps {
     isOpen: boolean;
@@ -23,7 +23,8 @@ const PROVIDER_LINKS: Record<string, string> = {
 
 export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProps) => {
     const { customApiKeys, setCustomApiKey, disconnectCustomKey } = useConfigStore();
-
+    const { toastSuccess, toastError } = useToast();
+    
     const activeKey = customApiKeys[provider];
     const [tempKey, setTempKey] = useState(activeKey || "");
     const [isConnecting, setIsConnecting] = useState(false);
@@ -34,7 +35,7 @@ export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProp
 
     const handleConnect = async () => {
         if (!tempKey.trim()) {
-            toast.error("Please enter a valid API Key");
+            toastError("Please enter a valid API Key", "Input Error");
             return;
         }
 
@@ -43,13 +44,13 @@ export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProp
 
         setCustomApiKey(provider, tempKey);
         setIsConnecting(false);
-        toast.success(`API Key updated for ${provider.toUpperCase()}!`);
+        toastSuccess(`API Key updated for ${provider.toUpperCase()}!`, "Connected");
         onClose();
     };
 
     const handleDisconnect = () => {
         disconnectCustomKey(provider);
-        toast.success(`Personal API Key for ${provider.toUpperCase()} removed.`);
+        toastSuccess(`Personal API Key for ${provider.toUpperCase()} removed.`, "Disconnected");
         onClose();
     };
 
@@ -81,9 +82,9 @@ export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProp
                         <div className="flex items-center justify-between">
                             <label className="text-sm font-medium text-secondary">{provider.toUpperCase()} API Key</label>
                             {docLink && (
-                                <a
-                                    href={docLink}
-                                    target="_blank"
+                                <a 
+                                    href={docLink} 
+                                    target="_blank" 
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 text-xs font-semibold text-brand-700 hover:text-brand-800"
                                 >
@@ -101,9 +102,9 @@ export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProp
                     </div>
 
                     {hasKey && (
-                        <Button
-                            color="tertiary-destructive"
-                            size="sm"
+                        <Button 
+                            color="tertiary-destructive" 
+                            size="sm" 
                             iconLeading={Trash01}
                             onClick={handleDisconnect}
                             className="w-fit"

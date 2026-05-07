@@ -16,13 +16,14 @@ import { cx } from "../../utils/cx";
 import { Markdown } from "../../components/shared-assets/markdown";
 import { Dialog, DialogTrigger, Modal, ModalOverlay } from "../../components/application/modals/modal";
 import { Heading as AriaHeading } from "react-aria-components";
-import { toast } from "sonner";
+import { useToast } from "@/contexts/use-toast";
 
 export const PlaygroundScreen = () => {
     const router = useRouter();
     const params = useParams();
     const id = params.id as string;
     const activeExam = useActiveExam();
+    const { toastError, toastWarning } = useToast();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const {
@@ -57,15 +58,13 @@ export const PlaygroundScreen = () => {
         const chunks = Math.ceil(total / chunkSize);
 
         let allQuestions: Question[] = [];
+        let hasErrorOccurred = false;
 
         try {
             for (let i = 0; i < chunks; i++) {
                 const range = `question number ${i + 1}`;
-
                 const config = activeExam.config;
                 const skill = config.skills[Math.floor(Math.random() * config.skills.length)];
-
-                const prompt = `${range}, ['${skill}']`;
 
                 const response = await fetch("/api/generate", {
                     method: "POST",
@@ -74,15 +73,25 @@ export const PlaygroundScreen = () => {
                 });
 
                 const chunkData = await response.json();
-                console.log(`Chunk ${i + 1} response:`, chunkData);
 
                 if (!response.ok) {
-                    throw new Error(chunkData.error || "Failed to generate chunk");
+                    hasErrorOccurred = true;
+                    const errorMessage = chunkData.error || "Reached usage limit or API error.";
+                    
+                    if (allQuestions.length > 0) {
+                        // If we have some questions, stop here but use what we have
+                        toastWarning(
+                            `Generation partially stopped: ${errorMessage}. Using ${allQuestions.length} questions.`, 
+                            "Partial Content Generated"
+                        );
+                        break; 
+                    } else {
+                        throw new Error(errorMessage);
+                    }
                 }
 
                 const { questions: chunkQuestions } = chunkData;
                 allQuestions = [...allQuestions, ...chunkQuestions];
-
                 setGeneratingProgress(Math.round(((i + 1) / chunks) * 100));
             }
 
@@ -90,18 +99,16 @@ export const PlaygroundScreen = () => {
                 throw new Error("AI failed to generate any questions. Please try again.");
             }
 
-            setQuestions(allQuestions.slice(0, total));
+            // Set whatever we managed to generate
+            setQuestions(allQuestions);
+            setStatus("ongoing");
         } catch (err: any) {
             console.error(err);
             const errorMessage = err.message || "Failed to generate questions. Please try again.";
             setError(errorMessage);
             
-            // Show toast and redirect home
-            toast.error("Generation Failed", {
-                description: errorMessage,
-            });
+            toastError(errorMessage, "Generation Failed");
             
-            // Delete the empty exam attempt and go home
             if (activeExam) {
                 deleteExam(activeExam.id);
             }
@@ -109,7 +116,8 @@ export const PlaygroundScreen = () => {
         } finally {
             isGenerating.current = false;
         }
-    }, [activeExam?.config, setStatus, setQuestions]);
+    }, [activeExam, setStatus, setQuestions, toastError, toastWarning, router, deleteExam]);
+    
     // Sync active exam with URL
     useEffect(() => {
         if (hasHydrated && id && id !== activeExam?.id) {
@@ -150,7 +158,7 @@ export const PlaygroundScreen = () => {
         );
     }
 
-    if (error) {
+    if (error && questions.length === 0) {
         return (
             <div className="flex h-dvh flex-col items-center justify-center gap-6 bg-primary px-4">
                 <div className="text-center">
@@ -178,7 +186,7 @@ export const PlaygroundScreen = () => {
     }
 
     const currentQuestion = questions[currentQuestionIndex];
-    if (!currentQuestion) {
+    if (!currentQuestion && questions.length > 0) {
         return (
             <div className="flex h-dvh flex-col items-center justify-center gap-6 bg-primary px-4 text-center">
                 <p className="text-md text-tertiary">Loading question {currentQuestionIndex + 1}...</p>
@@ -186,6 +194,9 @@ export const PlaygroundScreen = () => {
             </div>
         );
     }
+
+    // Safety fallback for empty questions after loading
+    if (questions.length === 0) return null;
 
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
 

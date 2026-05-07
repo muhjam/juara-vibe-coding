@@ -13,6 +13,7 @@ import { ChevronDown, ChevronUp, Settings01, File06, Zap, ShieldTick, Translate0
 import { CustomKeyModal } from "../custom-key-modal";
 import { BadgeWithIcon } from "@/components/base/badges/badges";
 import { cx } from "@/utils/cx";
+import { useToast } from "@/contexts/use-toast";
 
 const LANGUAGES = [
     { id: "English", label: "English" },
@@ -43,6 +44,7 @@ const StatusDot = ({ color = "success" }: { color?: "success" | "error" | "warni
 
 export const ConfigForm = () => {
     const router = useRouter();
+    const { toastSuccess, toastError, toastWarning } = useToast();
     const createExamAction = useExamStore((state) => state.createNewExam);
 
     const {
@@ -69,22 +71,35 @@ export const ConfigForm = () => {
     }, []);
 
     const handleGenerate = () => {
+        // Validation
+        if (selectedSkills.length === 0) {
+            toastError("Please select at least one skill to test.", "Missing Selection");
+            return;
+        }
+
+        if (questionCount <= 0) {
+            toastError("Number of questions must be at least 1.", "Invalid Count");
+            return;
+        }
+
+        const currentStatus = connectionStatuses[provider];
+        if (currentStatus !== "connected") {
+            toastWarning(`The selected provider (${provider.toUpperCase()}) is not connected. Generation might fail.`, "Connection Warning");
+        }
+
         setIsLoading(true);
         try {
-            if (questionCount === 0) { setIsLoading(false); return; }
-            if (selectedSkills.length === 0) {
-                setIsLoading(false);
-                return;
-            }
-
             const examId = createExamAction({
                 language,
                 questionCount,
                 skills: selectedSkills,
             });
+            
+            toastSuccess("Creating your exam questions now.", "Success");
             router.push(`/playground/${examId}`);
         } catch (e) {
             console.error(e);
+            toastError("Failed to initiate exam creation.", "Error");
             setIsLoading(false);
         }
     };
