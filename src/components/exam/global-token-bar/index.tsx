@@ -6,7 +6,7 @@ import { cx } from "@/utils/cx";
 
 export const GlobalTokenBar = () => {
     const { connectionStatuses, provider, customApiKeys, usePersonalKey } = useConfigStore();
-    
+
     const status = connectionStatuses[provider];
     const hasPersonalKey = !!customApiKeys[provider];
     const isUsingPersonal = hasPersonalKey && usePersonalKey;
@@ -41,24 +41,25 @@ export const GlobalTokenBar = () => {
 
     return (
         <div className={cx(
-            "flex w-full md:max-w-md md:mx-auto flex-col gap-1 rounded-xl border p-3 shadow-xs backdrop-blur-sm transition-all duration-300",
-            config.color === "success" ? "border-success-200 bg-success-25/50" :
-                config.color === "warning" ? "border-warning-200 bg-warning-25/50" :
-                    "border-error-200 bg-error-25/50"
+            "flex w-full md:max-w-md md:mx-auto flex-col gap-1 rounded-xl border p-3 shadow-xs backdrop-blur-md transition-all duration-300",
+            // Border & BG logic
+            config.color === "success" ? "border-success-200 bg-success-25/50 dark:border-success-500/30 dark:bg-success-500/5" :
+                config.color === "warning" ? "border-warning-200 bg-warning-25/50 dark:border-warning-500/30 dark:bg-warning-500/5" :
+                    "border-error-200 bg-error-25/50 dark:border-error-500/30 dark:bg-error-500/5"
         )}>
             <div className="flex items-center justify-between text-xs font-medium">
                 <div className="flex items-center gap-1.5">
                     <Icon className={cx(
                         "size-3.5",
-                        config.color === "success" ? "text-success-600" :
-                            config.color === "warning" ? "text-warning-600" :
-                                "text-error-600"
+                        config.color === "success" ? "text-success-600 dark:text-success-400" :
+                            config.color === "warning" ? "text-warning-600 dark:text-warning-400" :
+                                "text-error-600 dark:text-error-400"
                     )} />
                     <span className={cx(
                         "capitalize font-bold",
-                        config.color === "success" ? "text-success-700" :
-                            config.color === "warning" ? "text-warning-700" :
-                                "text-error-700"
+                        config.color === "success" ? "text-success-700 dark:text-success-300" :
+                            config.color === "warning" ? "text-warning-700 dark:text-warning-300" :
+                                "text-error-700 dark:text-error-300"
                     )}>
                         {config.label}
                     </span>
@@ -74,7 +75,7 @@ export const GlobalTokenBar = () => {
                 </div>
             </div>
 
-            <p className="text-[10px] text-tertiary">
+            <p className="text-[10px] text-tertiary dark:text-secondary-dark">
                 {config.sub}
             </p>
         </div>
