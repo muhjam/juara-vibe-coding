@@ -5,7 +5,7 @@ import { useConfigStore, AIProvider } from "@/store/use-config-store";
 import { Modal } from "@/components/shared-assets/modal";
 import { Input } from "@/components/base/input/input";
 import { Button } from "@/components/base/buttons/button";
-import { Key01, CheckCircle, Trash01 } from "@untitledui/icons";
+import { Key01, CheckCircle, Trash01, ArrowUpRight } from "@untitledui/icons";
 import { toast } from "sonner";
 
 interface CustomKeyModalProps {
@@ -14,14 +14,20 @@ interface CustomKeyModalProps {
     provider: AIProvider;
 }
 
+const PROVIDER_LINKS: Record<string, string> = {
+    groq: "https://console.groq.com/keys",
+    gemini: "https://aistudio.google.com/app/apikey",
+    openai: "https://platform.openai.com/api-keys",
+    anthropic: "https://console.anthropic.com/settings/keys",
+};
+
 export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProps) => {
     const { customApiKeys, setCustomApiKey, disconnectCustomKey } = useConfigStore();
-    
+
     const activeKey = customApiKeys[provider];
     const [tempKey, setTempKey] = useState(activeKey || "");
     const [isConnecting, setIsConnecting] = useState(false);
 
-    // Sync tempKey when provider or customApiKeys changes
     useEffect(() => {
         setTempKey(customApiKeys[provider] || "");
     }, [provider, customApiKeys, isOpen]);
@@ -48,6 +54,7 @@ export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProp
     };
 
     const hasKey = !!activeKey;
+    const docLink = PROVIDER_LINKS[provider];
 
     return (
         <Modal
@@ -70,19 +77,33 @@ export const CustomKeyModal = ({ isOpen, onClose, provider }: CustomKeyModalProp
         >
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
-                    <Input
-                        label={`${provider.toUpperCase()} API Key`}
-                        placeholder={`Paste your ${provider} API key here...`}
-                        value={tempKey}
-                        onChange={setTempKey}
-                        icon={Key01}
-                        type="password"
-                    />
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-secondary">{provider.toUpperCase()} API Key</label>
+                            {docLink && (
+                                <a
+                                    href={docLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-xs font-semibold text-brand-700 hover:text-brand-800"
+                                >
+                                    Get your key <ArrowUpRight className="size-3" />
+                                </a>
+                            )}
+                        </div>
+                        <Input
+                            placeholder={`Paste your ${provider} API key here...`}
+                            value={tempKey}
+                            onChange={setTempKey}
+                            icon={Key01}
+                            type="password"
+                        />
+                    </div>
 
                     {hasKey && (
-                        <Button 
-                            color="tertiary-destructive" 
-                            size="sm" 
+                        <Button
+                            color="tertiary-destructive"
+                            size="sm"
                             iconLeading={Trash01}
                             onClick={handleDisconnect}
                             className="w-fit"
