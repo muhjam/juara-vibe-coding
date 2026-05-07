@@ -1,12 +1,12 @@
 export const AI_PROVIDER = process.env.AI_PROVIDER || "gemini";
 export const AI_MODEL_NAME = process.env.AI_MODEL_NAME;
 
-// API Keys
+// API Keys (Server Only)
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 export const GROQ_API_KEY = process.env.GROQ_API_KEY;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-// Optional Dify (if ever needed again)
+// Optional Dify
 export const DIFY_HOST = process.env.NEXT_PUBLIC_DIFY_HOST;
 export const DIFY_TOKEN = process.env.NEXT_PUBLIC_DIFY_EXAMS_QUESTIONS_GENERATOR_TOKEN;

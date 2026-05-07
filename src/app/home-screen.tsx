@@ -1,25 +1,24 @@
 "use client";
 
-import { BookOpen01, Zap, PlayCircle } from "@untitledui/icons";
-import { ConfigForm } from "../components/exam/config-form";
-import { ExamHistory } from "../components/exam/exam-history";
 import { useExamStore } from "../store/use-exam-store";
-import { FeaturedIcon } from "../components/foundations/featured-icon/featured-icon";
 import { ThemeToggle } from "../components/foundations/theme-toggle";
 import { UntitledLogoMinimal } from "../components/foundations/logo/untitledui-logo-minimal";
 import { Badge } from "../components/base/badges/badges";
-import { Button } from "@/components/base/buttons/button";
+import { HeroSection } from "../components/exam/hero-section";
+import { ExamHistory } from "../components/exam/exam-history";
 
 export const HomeScreen = () => {
     const exams = useExamStore((state) => state.exams);
 
     return (
-        <div className="flex min-h-dvh flex-col bg-primary relative overflow-hidden">
-            {/* Background decorative elements */}
-            <div className="absolute -top-[10%] -left-[10%] size-[40%] rounded-full bg-brand-soft/20 blur-[120px]" />
-            <div className="absolute -bottom-[10%] -right-[10%] size-[40%] rounded-full bg-brand-soft/20 blur-[120px]" />
+        <div className="flex min-h-dvh flex-col bg-primary relative">
+            {/* Background decorative elements - Moved overflow-hidden here locally if needed */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+                <div className="absolute -top-[10%] -left-[10%] size-[40%] rounded-full bg-brand-soft/20 blur-[120px]" />
+                <div className="absolute -bottom-[10%] -right-[10%] size-[40%] rounded-full bg-brand-soft/20 blur-[120px]" />
+            </div>
 
-            <header className="mx-auto flex w-full max-w-container items-center justify-between px-4 py-6 md:px-8">
+            <header className="relative mx-auto flex w-full max-w-container items-center justify-between px-4 py-6 md:px-8">
                 <div className="flex items-center gap-2">
                     <UntitledLogoMinimal className="size-8" />
                     <span className="text-xl font-bold text-primary">Vibe Language</span>
@@ -29,40 +28,7 @@ export const HomeScreen = () => {
             </header>
 
             <main className="relative flex flex-1 flex-col items-center">
-                {/* Hero & Config Form */}
-                <section className="mx-auto flex w-full max-w-container flex-col items-center justify-center gap-12 lg:py-16 lg:flex-row lg:items-start lg:justify-between lg:px-8 lg:py-24">
-                    <div className="flex max-w-xl flex-col gap-6 text-center lg:text-left">
-                        <div className="flex justify-center lg:justify-start">
-                            <FeaturedIcon icon={Zap} color="brand" theme="light" size="lg" />
-                        </div>
-
-                        <div className="flex flex-col gap-4">
-                            <h1 className="text-display-md font-semibold text-primary lg:text-display-lg">
-                                Master Any Language with AI-Powered Testing
-                            </h1>
-                            <p className="text-lg text-tertiary lg:text-xl">
-                                Generate personalized exams in seconds. Practice Reading, Writing, Speaking, and Listening in 14+ languages with always-unique questions ensuring you never encounter the same test twice.
-                            </p>
-                        </div>
-
-                        <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
-                            <div className="flex items-center gap-2 rounded-full border border-secondary bg-primary px-3 py-1 text-sm font-medium text-secondary">
-                                <BookOpen01 className="size-4" />
-                                <span>Learn faster</span>
-                            </div>
-                            <div className="flex items-center gap-2 rounded-full border border-secondary bg-primary px-3 py-1 text-sm font-medium text-secondary">
-                                <Zap className="size-4" />
-                                <span>AI Generated</span>
-                            </div>
-                        </div>
-
-                        <Button className="w-fit mx-auto px-12 md:hidden" iconLeading={PlayCircle}>Start</Button>
-                    </div>
-
-                    <div className="z-10 w-full lg:max-w-md flex w-full justify-center">
-                        <ConfigForm />
-                    </div>
-                </section>
+                <HeroSection />
 
                 {/* History Section */}
                 {exams.length > 0 && (

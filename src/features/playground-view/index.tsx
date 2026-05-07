@@ -8,8 +8,11 @@ import { useRouter } from "next/navigation";
 import { parseAIResponse, Question } from "@/lib/ai/parser";
 import { Microphone01, Play, StopCircle } from "@untitledui/icons";
 
+import { useConfigStore } from "@/store/use-config-store";
+
 export const PlaygroundView = () => {
     const router = useRouter();
+    const { provider, modelName, customApiKeys, useTokens } = useConfigStore();
     const [config, setConfig] = useState<any>(null);
     const [currentIndex, setCurrentIndex] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +21,9 @@ export const PlaygroundView = () => {
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const [isRecording, setIsRecording] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
+
+    // Get the key for the active provider
+    const activeCustomKey = customApiKeys[provider];
 
     useEffect(() => {
         const savedConfig = localStorage.getItem("lang-test-config");
@@ -36,22 +42,26 @@ export const PlaygroundView = () => {
         try {
             const skill = currentConfig.skills[Math.floor(Math.random() * currentConfig.skills.length)];
 
-            const res = await fetch("/api/generate-question", {
+            const res = await fetch("/api/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    index,
+                    range: index,
                     skill,
-                    type: currentConfig.type,
-                    language: currentConfig.language
+                    language: currentConfig.language,
+                    provider,
+                    model: modelName,
+                    customApiKey: activeCustomKey
                 })
             });
             const data = await res.json();
             if (data.error) throw new Error(data.error);
 
-            const parsed = parseAIResponse(data.rawResponse);
-            if (parsed.length > 0) {
-                const newQuestion = parsed[0];
+            // Mock token usage
+            useTokens(Math.floor(Math.random() * 500) + 200);
+
+            if (data.questions && data.questions.length > 0) {
+                const newQuestion = data.questions[0];
                 setCurrentQuestion(newQuestion);
                 setQuestions(prev => {
                     const updated = [...prev];

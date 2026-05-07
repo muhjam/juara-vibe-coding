@@ -3,21 +3,16 @@ import { Question, SkillType } from "@/store/use-exam-store";
 import { SYSTEM_PROMPT } from "@/utils/ai-prompts";
 import { FINE_TUNE_EXAMPLES } from "@/utils/ai-examples";
 import {
-    AI_PROVIDER,
-    AI_MODEL_NAME,
-    GEMINI_API_KEY,
-    GROQ_API_KEY,
-    OPENAI_API_KEY,
-    ANTHROPIC_API_KEY
+    GEMINI_API_KEY as DEFAULT_GEMINI_API_KEY,
+    GROQ_API_KEY as DEFAULT_GROQ_API_KEY,
+    OPENAI_API_KEY as DEFAULT_OPENAI_API_KEY,
+    ANTHROPIC_API_KEY as DEFAULT_ANTHROPIC_API_KEY
 } from "@/config";
 
-async function callGemini(prompt: string): Promise<string> {
-    const apiKey = GEMINI_API_KEY;
-    const model = AI_MODEL_NAME;
+async function callGemini(prompt: string, model: string, customKey?: string): Promise<string> {
+    const apiKey = customKey || DEFAULT_GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
-    // Format Gemini messages: System is usually part of the first user message or separate instructions
-    // Here we use the standard contents array
     const contents = [
         ...FINE_TUNE_EXAMPLES.map(ex => ({
             role: ex.role === "assistant" ? "model" : "user",
@@ -42,9 +37,8 @@ async function callGemini(prompt: string): Promise<string> {
     return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
-async function callGroq(prompt: string): Promise<string> {
-    const apiKey = GROQ_API_KEY;
-    const model = AI_MODEL_NAME;
+async function callGroq(prompt: string, model: string, customKey?: string): Promise<string> {
+    const apiKey = customKey || DEFAULT_GROQ_API_KEY;
     if (!apiKey) throw new Error("GROQ_API_KEY is not set");
 
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -68,9 +62,8 @@ async function callGroq(prompt: string): Promise<string> {
     return data.choices?.[0]?.message?.content || "";
 }
 
-async function callOpenAI(prompt: string): Promise<string> {
-    const apiKey = OPENAI_API_KEY;
-    const model = AI_MODEL_NAME;
+async function callOpenAI(prompt: string, model: string, customKey?: string): Promise<string> {
+    const apiKey = customKey || DEFAULT_OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -93,9 +86,8 @@ async function callOpenAI(prompt: string): Promise<string> {
     return data.choices?.[0]?.message?.content || "";
 }
 
-async function callAnthropic(prompt: string): Promise<string> {
-    const apiKey = ANTHROPIC_API_KEY;
-    const model = AI_MODEL_NAME;
+async function callAnthropic(prompt: string, model: string, customKey?: string): Promise<string> {
+    const apiKey = customKey || DEFAULT_ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -164,23 +156,28 @@ function parseCSV(raw: string, defaultSkill: SkillType): Question[] {
 
 export async function POST(req: NextRequest) {
     try {
-        const { range, skill, language } = await req.json();
+        const { range, skill, language, provider, model, customApiKey } = await req.json();
+        
         if (!range || !skill) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
+        // Use defaults if not provided (fallback)
+        const activeProvider = provider || "groq";
+        const activeModel = model || "llama-3.3-70b-versatile";
+
         const userPrompt = `question number ${range}, ['${skill}']${language ? ` for ${language} language` : ""}`;
         let rawResponse = "";
 
-        switch (AI_PROVIDER) {
-            case "gemini": rawResponse = await callGemini(userPrompt); break;
-            case "groq": rawResponse = await callGroq(userPrompt); break;
-            case "openai": rawResponse = await callOpenAI(userPrompt); break;
-            case "anthropic": rawResponse = await callAnthropic(userPrompt); break;
-            default: rawResponse = await callGemini(userPrompt); break;
+        switch (activeProvider) {
+            case "gemini": rawResponse = await callGemini(userPrompt, activeModel, customApiKey); break;
+            case "groq": rawResponse = await callGroq(userPrompt, activeModel, customApiKey); break;
+            case "openai": rawResponse = await callOpenAI(userPrompt, activeModel, customApiKey); break;
+            case "anthropic": rawResponse = await callAnthropic(userPrompt, activeModel, customApiKey); break;
+            default: rawResponse = await callGroq(userPrompt, activeModel, customApiKey); break;
         }
 
-        console.log(`[${AI_PROVIDER}] Raw response:`, rawResponse);
+        console.log(`[${activeProvider}] Raw response:`, rawResponse);
         const questions = parseCSV(rawResponse, skill as SkillType);
         return NextResponse.json({ questions, raw: rawResponse });
     } catch (error: any) {
