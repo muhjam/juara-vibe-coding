@@ -60,7 +60,7 @@ async function callGroq(prompt: string): Promise<string> {
                 ...FINE_TUNE_EXAMPLES,
                 { role: "user", content: prompt },
             ],
-            temperature: 0.7,
+            temperature: 1.1,
         }),
     });
     const data = await res.json();

@@ -285,7 +285,7 @@ export const PlaygroundScreen = () => {
 
                         <div className="flex flex-col gap-4 md:gap-6">
                             {currentQuestion.skill.toLowerCase() === "listening" ? (
-                                <AudioPlayer text={currentQuestion.description} language={config.language} />
+                                <AudioPlayer key={currentQuestion.id} text={currentQuestion.description} language={config.language} />
                             ) : currentQuestion.skill.toLowerCase() === "writing" ? (
                                 <div className="flex flex-col gap-6">
                                     <div className="text-md md:text-lg font-medium text-primary leading-relaxed">

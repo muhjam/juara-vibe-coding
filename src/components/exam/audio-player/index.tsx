@@ -46,6 +46,13 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
 
     // Parse text into segments based on speaker labels
     useEffect(() => {
+        // Reset state whenever the text (question) changes
+        window.speechSynthesis.cancel();
+        isPausedRef.current = false;
+        setIsPlaying(false);
+        setProgress(0);
+        setCurrentSegmentIndex(0);
+
         const segments: Segment[] = [];
         // Clean up common AI artifacts and HTML tags for speech
         const cleanText = text.replace(/<br\s*\/?>/gi, "\n").replace(/<\/?[^>]+(>|$)/g, "");
@@ -95,7 +102,7 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
         const langPrefix = langCode.split("-")[0];
 
         let langVoices = voices.filter(v => v.lang.startsWith(langPrefix));
-        
+
         // Fallback for Javanese/Sundanese to Indonesian if no native voices found
         if (langVoices.length === 0 && (language === "Javanese" || language === "Sundanese")) {
             langVoices = voices.filter(v => v.lang.startsWith("id"));
@@ -103,51 +110,66 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
 
         if (langVoices.length === 0) return null;
 
-        // 1. Find HIGH QUALITY voices first
-        const highQualityVoices = langVoices.filter(v => 
-            v.name.toLowerCase().includes("google") || 
-            v.name.toLowerCase().includes("natural") || 
+        // 1. Categorize voices by quality
+        // Premium: Natural, Neural, Premium, or Online (remote) voices
+        const premiumVoices = langVoices.filter(v =>
+            v.name.toLowerCase().includes("natural") ||
+            v.name.toLowerCase().includes("neural") ||
+            v.name.toLowerCase().includes("premium") ||
+            v.name.toLowerCase().includes("online") ||
+            v.localService === false // Remote voices are usually higher quality
+        );
+
+        // Prioritize Truly Natural/Neural over other Premium
+        const eliteVoices = premiumVoices.filter(v =>
+            v.name.toLowerCase().includes("natural") ||
             v.name.toLowerCase().includes("neural")
         );
-        
-        // 2. Find STANDARD (robotic) voices
-        const standardVoices = langVoices.filter(v => !highQualityVoices.includes(v));
+
+        const googleVoices = langVoices.filter(v =>
+            v.name.toLowerCase().includes("google") && !premiumVoices.includes(v)
+        );
+
+        const standardVoices = langVoices.filter(v =>
+            !premiumVoices.includes(v) && !googleVoices.includes(v)
+        );
+
+        const maleKeywords = /\bmale\b|david|alex|daniel|guy|mark|james|john|robert|william|michael|laki-laki|\blaki\b/i;
+        const femaleKeywords = /\bfemale\b|samantha|zira|karen|victoria|anna|claire|maria|julie|susan|linda|mary|sarah|perempuan|wanita/i;
+
+        const isMale = (v: SpeechSynthesisVoice) => v.name.toLowerCase().match(maleKeywords);
+        const isFemale = (v: SpeechSynthesisVoice) => v.name.toLowerCase().match(femaleKeywords);
+
+        let selectedVoice: SpeechSynthesisVoice | null = null;
 
         if (speaker === "male") {
-            // Priority: High quality male
-            const naturalMale = highQualityVoices.find(v => 
-                v.name.toLowerCase().match(/male|david|alex|daniel|guy|man|laki-laki|laki/i)
-            );
-            if (naturalMale) return naturalMale;
-            
-            // Fallback to any high quality if no specific male high quality found
-            if (highQualityVoices.length > 0) return highQualityVoices[0];
-            
-            // Extreme fallback to standard male
-            return standardVoices.find(v => v.name.toLowerCase().match(/male|david|alex|daniel|guy|man|laki-laki|laki/i)) || langVoices[0];
-        } 
-        
-        if (speaker === "female") {
-            // Priority: High quality female
-            const naturalFemale = highQualityVoices.find(v => 
-                v.name.toLowerCase().match(/female|samantha|zira|karen|victoria|woman|girl|perempuan|wanita/i)
-            );
-            if (naturalFemale) return naturalFemale;
-            
-            // Fallback to any high quality (try to avoid the first one if it's male)
-            if (highQualityVoices.length > 1) return highQualityVoices[1];
-            if (highQualityVoices.length > 0) return highQualityVoices[0];
-
-            // Extreme fallback to standard female
-            return standardVoices.find(v => v.name.toLowerCase().match(/female|samantha|zira|karen|victoria|woman|girl|perempuan|wanita/i)) || langVoices[Math.min(1, langVoices.length - 1)];
+            selectedVoice = eliteVoices.find(isMale) ||
+                premiumVoices.find(isMale) ||
+                googleVoices.find(isMale) ||
+                langVoices.find(isMale) ||
+                // Fallback to any elite that isn't explicitly female
+                eliteVoices.find(v => !isFemale(v)) ||
+                langVoices[0];
+        } else if (speaker === "female") {
+            selectedVoice = eliteVoices.find(isFemale) ||
+                premiumVoices.find(isFemale) ||
+                googleVoices.find(isFemale) ||
+                langVoices.find(isFemale) ||
+                // Fallback to any elite that isn't explicitly male
+                eliteVoices.find(v => !isMale(v)) ||
+                // Fallback to any lang voice that isn't explicitly male
+                langVoices.find(v => !isMale(v)) ||
+                langVoices[Math.min(1, langVoices.length - 1)];
+        } else {
+            // Narrator: prefer robotic male
+            selectedVoice = standardVoices.find(isMale) ||
+                googleVoices.find(isMale) ||
+                standardVoices[0] ||
+                langVoices[0];
         }
 
-        // Narrator: specifically pick a ROBOTIC male voice
-        const roboticMale = standardVoices.find(v => 
-            v.name.toLowerCase().match(/male|david|alex|microsoft|standard/i)
-        );
-        
-        return roboticMale || standardVoices[0] || langVoices[0];
+        console.log(`[AudioPlayer] Speaker: ${speaker}, Selected Voice: ${selectedVoice?.name} (${selectedVoice?.lang})`);
+        return selectedVoice;
     }, [voices, language]);
 
     const playSegment = useCallback((index: number) => {
@@ -202,7 +224,13 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
             } else {
                 window.speechSynthesis.cancel();
                 isPausedRef.current = false;
-                playSegment(currentSegmentIndex);
+
+                // NEW: If we reached the end, restart from beginning
+                const targetIndex = currentSegmentIndex >= segmentsRef.current.length ? 0 : currentSegmentIndex;
+                if (targetIndex === 0) {
+                    setProgress(0);
+                }
+                playSegment(targetIndex);
             }
             setIsPlaying(true);
         }
@@ -263,11 +291,7 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                 </div>
             </div>
 
-            {isPlaying && segmentsRef.current[currentSegmentIndex] && (
-                <div className="text-xs font-medium text-brand-500 animate-pulse">
-                    Speaking: {segmentsRef.current[currentSegmentIndex].speaker.toUpperCase()}
-                </div>
-            )}
+
         </div>
     );
 };

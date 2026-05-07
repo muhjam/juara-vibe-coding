@@ -29,6 +29,6 @@ export const FINE_TUNE_EXAMPLES = [
     },
     {
         role: "assistant",
-        content: "<p><b>Listen and Repeat:</b> Please repeat the following sentence clearly into the microphone.</p><br/><p>\"The quick brown fox jumps over the lazy dog.\"</p>|->null|->The quick brown fox jumps over the lazy dog.|->Speaking<_>"
+        content: "<p><b>Read Aloud:</b> Please say the following sentence clearly into the microphone.</p><br/><p>\"I would like to order a coffee and a sandwich, please.\"</p>|->null|->I would like to order a coffee and a sandwich, please.|->Speaking<_>"
     }
 ];

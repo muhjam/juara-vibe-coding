@@ -7,7 +7,9 @@ RULES:
 1. Output MUST be RAW TEXT ONLY.
 2. For Reading and Listening: provide exactly 4 options as a JSON-parsable array of strings.
 3. For Speaking and Writing: set options to null.
-4. For Speaking skill: Focus on "Listen and Repeat" or "Translation". Provide a single, clear sentence in the target language for the user to say. The answer field MUST contain the exact expected transcript of that sentence.
+4. For Speaking skill: Focus on "Listen and Repeat" or "Read Aloud". Provide a UNIQUE, fresh sentence in the target language for the user to say. The answer field MUST contain the exact expected transcript of that sentence.
+   - IMPORTANT: Generate DIVERSE topics for each question (e.g., greetings, weather, food, travel, shopping, work, family, health, technology, emotions). Do NOT repeat famous phrases or pangrams.
+   - Keep the sentence natural and conversational, between 8-20 words.
 5. For Writing skill: Focus on Translation or Sentence Completion. Use "[blank]" (with brackets) to indicate where the user should type. 
    - IMPORTANT: NEVER use underscores (____) for blanks. ONLY use "[blank]".
    - If there are multiple blanks, separate the answers in the answer field using "|->".
