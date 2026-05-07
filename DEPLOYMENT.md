@@ -27,11 +27,12 @@ gcloud services enable run.googleapis.com \
 The fastest way is using `gcloud run deploy`. This will build your image using Cloud Build and deploy it in one go.
 
 ```bash
-gcloud run deploy ai-lingua \
+gcloud run deploy vibe-language \
   --source . \
   --region asia-southeast2 \
   --allow-unauthenticated \
-  --set-env-vars="GEMINI_API_KEY=[YOUR_GEMINI_API_KEY]"
+  --port 8080 \
+  --set-env-vars="GEMINI_API_KEY=[ISI_KEY_ANDA]"
 ```
 
 ## 4. Method B: Deploy via GitHub (Continuous Deployment)

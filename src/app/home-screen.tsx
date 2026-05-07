@@ -21,7 +21,7 @@ export const HomeScreen = () => {
             <header className="mx-auto flex w-full max-w-container items-center justify-between px-4 py-6 md:px-8">
                 <div className="flex items-center gap-2">
                     <UntitledLogoMinimal className="size-8" />
-                    <span className="text-xl font-bold text-primary">AI Lingua</span>
+                    <span className="text-xl font-bold text-primary">Vibe Language</span>
                     <Badge color="success">Free</Badge>
                 </div>
                 <ThemeToggle />
@@ -71,7 +71,7 @@ export const HomeScreen = () => {
 
             <footer className="mx-auto w-full max-w-container px-4 py-8 md:px-8">
                 <p className="text-center text-sm text-tertiary">
-                    &copy; 2026 AI Lingua by <a href="https://github.com/muhjam" target="_blank" className="hover:underline">Jamjam</a>. Developed with Antigravity.
+                    &copy; 2026 Vibe Language by <a href="https://github.com/muhjam" target="_blank" className="hover:underline">Jamjam</a>. Developed with Antigravity.
                 </p>
             </footer>
         </div>

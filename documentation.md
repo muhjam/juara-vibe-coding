@@ -1,7 +1,7 @@
-# AI Lingua - Documentation for #JuaraVibeCoding
+# Vibe Language - Documentation for #JuaraVibeCoding
 
 ## 🚀 Project Overview
-**AI Lingua** is a next-generation language proficiency platform that leverages advanced AI to generate unique, personalized, and immersive language tests. Unlike traditional platforms that rely on static question banks, AI Lingua ensures that every test session is completely original, tailored to the user's selected language and skill level.
+**Vibe Language** is a next-generation language proficiency platform that leverages advanced AI to generate unique, personalized, and immersive language tests. Unlike traditional platforms that rely on static question banks, Vibe Language ensures that every test session is completely original, tailored to the user's selected language and skill level.
 
 ---
 
@@ -45,7 +45,7 @@ AI Lingua moves away from the rigid "Multiple Choice vs Essay" model. Instead, i
 ### Technical Elegance (The AI "Wow")
 *   **Prompt Engineering**: A sophisticated 4-column CSV parsing system allows for structured data extraction from raw AI responses, ensuring 100% compatibility with the UI.
 *   **Multi-Voice Logic**: Custom logic to differentiate browser voices (Neural/Natural vs Standard) to create a "Narrator" (Robotic) vs "Character" (Human-like) auditory experience.
-*   **Regional AI Support**: Deep integration with AI models that are fine-tuned to understand and generate content in **Javanese (su-ID)** and **Sundanese (jv-ID)**, making AI Lingua a leader in local-first educational tech.
+*   **Regional AI Support**: Deep integration with AI models that are fine-tuned to understand and generate content in **Javanese (su-ID)** and **Sundanese (jv-ID)**, making Vibe Language a leader in local-first educational tech.
 
 ---
 
