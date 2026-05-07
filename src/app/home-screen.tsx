@@ -22,7 +22,7 @@ export const HomeScreen = () => {
                 <div className="flex items-center gap-2">
                     <UntitledLogoMinimal className="size-8" />
                     <span className="text-xl font-bold text-primary">Vibe Language</span>
-                    <Badge color="success">Free</Badge>
+                    <Badge color="success">Beta</Badge>
                 </div>
                 <ThemeToggle />
             </header>
