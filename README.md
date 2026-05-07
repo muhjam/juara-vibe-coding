@@ -10,10 +10,11 @@ AI Lingua is a modern, AI-powered language assessment platform built with Next.j
 - **Multilingual Support**: Learn English, Japanese, Korean, French, Spanish, Mandarin, Arabic, German, Italian, Portuguese, Russian, Hindi, Sundanese, or Javanese.
 - **Skill-Based Testing**:
   - **Reading**: Comprehension questions based on AI-generated texts.
-  - **Writing**: Essay and fill-in-the-blank tasks with character-similarity scoring.
+  - **Writing**: Sentence completion and translation with character-similarity scoring.
   - **Speaking**: Real-time voice recognition with live transcription feedback.
-  - **Listening**: (Coming Soon) AI-generated audio for comprehension tasks.
-- **Smart Evaluation**: Automated scoring and feedback to help you improve faster.
+  - **Listening**: Immersive audio dialogues with multiple distinct voices (Narrator vs Characters).
+- **#JuaraVibeCoding Submission**: Built specifically for the Google Cloud & AI Jam. [Read the full documentation here](./documentation.md).
+- **Smart Evaluation**: Automated scoring and feedback using similarity algorithms to help you improve faster.
 - **Beautiful UI**: Built with the premium **Untitled UI** design system for a sleek, modern, and accessible experience.
 - **Dark Mode**: Fully supports light and dark themes.
 
