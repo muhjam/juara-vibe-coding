@@ -26,6 +26,7 @@ const LANG_TAGS: Record<string, string> = {
     Hindi: "hi-IN",
     Sundanese: "su-ID",
     Javanese: "jv-ID",
+    Indonesian: "id-ID",
 };
 
 type SpeakerType = "male" | "female" | "narrator";
@@ -62,8 +63,6 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                 speaker = "female";
                 content = line.split(":").slice(1).join(":").trim();
             } else if (lower.includes(":")) {
-                // Check if the label before colon might be a name, default to narrator or try to guess?
-                // For simplicity, if it's not explicitly male/female, we use narrator unless it's a dialogue
                 content = line.split(":").slice(1).join(":").trim();
             }
 
@@ -95,53 +94,59 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
         const langCode = LANG_TAGS[language] || "en-US";
         const langPrefix = langCode.split("-")[0];
 
-        const langVoices = voices.filter(v => v.lang.startsWith(langPrefix));
+        let langVoices = voices.filter(v => v.lang.startsWith(langPrefix));
+        
+        // Fallback for Javanese/Sundanese to Indonesian if no native voices found
+        if (langVoices.length === 0 && (language === "Javanese" || language === "Sundanese")) {
+            langVoices = voices.filter(v => v.lang.startsWith("id"));
+        }
+
         if (langVoices.length === 0) return null;
 
         // 1. Find HIGH QUALITY voices first
-        const highQualityVoices = langVoices.filter(v =>
-            v.name.toLowerCase().includes("google") ||
-            v.name.toLowerCase().includes("natural") ||
+        const highQualityVoices = langVoices.filter(v => 
+            v.name.toLowerCase().includes("google") || 
+            v.name.toLowerCase().includes("natural") || 
             v.name.toLowerCase().includes("neural")
         );
-
+        
         // 2. Find STANDARD (robotic) voices
         const standardVoices = langVoices.filter(v => !highQualityVoices.includes(v));
 
         if (speaker === "male") {
             // Priority: High quality male
-            const naturalMale = highQualityVoices.find(v =>
-                v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("david") || v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("daniel")
+            const naturalMale = highQualityVoices.find(v => 
+                v.name.toLowerCase().match(/male|david|alex|daniel|guy|man|laki-laki|laki/i)
             );
             if (naturalMale) return naturalMale;
-
+            
             // Fallback to any high quality if no specific male high quality found
             if (highQualityVoices.length > 0) return highQualityVoices[0];
-
+            
             // Extreme fallback to standard male
-            return standardVoices.find(v => v.name.toLowerCase().includes("male")) || langVoices[0];
-        }
-
+            return standardVoices.find(v => v.name.toLowerCase().match(/male|david|alex|daniel|guy|man|laki-laki|laki/i)) || langVoices[0];
+        } 
+        
         if (speaker === "female") {
             // Priority: High quality female
-            const naturalFemale = highQualityVoices.find(v =>
-                v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("samantha") || v.name.toLowerCase().includes("zira") || v.name.toLowerCase().includes("karen")
+            const naturalFemale = highQualityVoices.find(v => 
+                v.name.toLowerCase().match(/female|samantha|zira|karen|victoria|woman|girl|perempuan|wanita/i)
             );
             if (naturalFemale) return naturalFemale;
-
+            
             // Fallback to any high quality (try to avoid the first one if it's male)
             if (highQualityVoices.length > 1) return highQualityVoices[1];
             if (highQualityVoices.length > 0) return highQualityVoices[0];
 
             // Extreme fallback to standard female
-            return standardVoices.find(v => v.name.toLowerCase().includes("female")) || langVoices[Math.min(1, langVoices.length - 1)];
+            return standardVoices.find(v => v.name.toLowerCase().match(/female|samantha|zira|karen|victoria|woman|girl|perempuan|wanita/i)) || langVoices[Math.min(1, langVoices.length - 1)];
         }
 
         // Narrator: specifically pick a ROBOTIC male voice
-        const roboticMale = standardVoices.find(v =>
-            v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("david") || v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("microsoft")
+        const roboticMale = standardVoices.find(v => 
+            v.name.toLowerCase().match(/male|david|alex|microsoft|standard/i)
         );
-
+        
         return roboticMale || standardVoices[0] || langVoices[0];
     }, [voices, language]);
 
