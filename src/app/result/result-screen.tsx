@@ -35,31 +35,36 @@ export const ResultScreen = () => {
 
     const { questions, userAnswers } = activeExam;
 
-    const gradableQuestions = questions.filter(q => q.type === "Multiple Choice" || q.skill.toLowerCase() === "writing");
+    const gradableQuestions = questions.filter(q => !!q.options || q.skill.toLowerCase() === "writing" || q.skill.toLowerCase() === "speaking");
     
     const correctAnswersCount = gradableQuestions.filter(q => {
         const userAnswerRaw = userAnswers[q.id] || "";
         
-        if (q.type === "Multiple Choice") {
+        if (q.options) {
             return userAnswerRaw === q.answer;
         }
         
-        if (q.skill.toLowerCase() === "writing") {
+        if (q.skill.toLowerCase() === "writing" || q.skill.toLowerCase() === "speaking") {
             try {
-                // For writing, answers are stored as a JSON array of strings
-                const userAnsArr = JSON.parse(userAnswerRaw || "[]");
-                const correctAnsArr = q.answer.split("|->").map(a => a.trim());
-                
-                if (correctAnsArr.length === 0) return false;
-                
-                // Calculate average similarity across all blanks
-                let totalSimilarity = 0;
-                correctAnsArr.forEach((correct, idx) => {
-                    totalSimilarity += calculateSimilarity(userAnsArr[idx] || "", correct);
-                });
-                
-                const avgSimilarity = totalSimilarity / correctAnsArr.length;
-                return avgSimilarity >= 0.9;
+                if (q.skill.toLowerCase() === "writing") {
+                    // For writing, answers are stored as a JSON array of strings
+                    const userAnsArr = JSON.parse(userAnswerRaw || "[]");
+                    const correctAnsArr = q.answer.split("|->").map(a => a.trim());
+                    
+                    if (correctAnsArr.length === 0) return false;
+                    
+                    // Calculate average similarity across all blanks
+                    let totalSimilarity = 0;
+                    correctAnsArr.forEach((correct, idx) => {
+                        totalSimilarity += calculateSimilarity(userAnsArr[idx] || "", correct);
+                    });
+                    
+                    const avgSimilarity = totalSimilarity / correctAnsArr.length;
+                    return avgSimilarity >= 0.9;
+                } else {
+                    // For speaking, it's a simple string comparison
+                    return calculateSimilarity(userAnswerRaw, q.answer) >= 0.9;
+                }
             } catch (e) {
                 // Fallback for old simple string answers
                 return calculateSimilarity(userAnswerRaw, q.answer) >= 0.9;
@@ -114,7 +119,7 @@ export const ResultScreen = () => {
 
                     <div className="flex flex-col gap-4">
                         {questions.map((q, idx) => {
-                            const isMC = q.type === "Multiple Choice";
+                            const isMC = !!q.options;
                             const isWriting = q.skill.toLowerCase() === "writing";
                             const userAnswerRaw = userAnswers[q.id] || "";
                             
@@ -124,20 +129,25 @@ export const ResultScreen = () => {
 
                             if (isMC) {
                                 isCorrect = userAnswerRaw === q.answer;
-                            } else if (isWriting) {
-                                try {
-                                    const userAnsArr = JSON.parse(userAnswerRaw || "[]");
-                                    const correctAnsArr = q.answer.split("|->").map(a => a.trim());
-                                    
-                                    let totalSimilarity = 0;
-                                    correctAnsArr.forEach((correct, i) => {
-                                        totalSimilarity += calculateSimilarity(userAnsArr[i] || "", correct);
-                                    });
-                                    similarity = correctAnsArr.length > 0 ? totalSimilarity / correctAnsArr.length : 0;
-                                    isCorrect = similarity >= 0.9;
-                                    
-                                    userAnsDisplay = Array.isArray(userAnsArr) ? userAnsArr.join(", ") : userAnswerRaw;
-                                } catch {
+                            } else if (isWriting || q.skill.toLowerCase() === "speaking") {
+                                if (isWriting) {
+                                    try {
+                                        const userAnsArr = JSON.parse(userAnswerRaw || "[]");
+                                        const correctAnsArr = q.answer.split("|->").map(a => a.trim());
+                                        
+                                        let totalSimilarity = 0;
+                                        correctAnsArr.forEach((correct, i) => {
+                                            totalSimilarity += calculateSimilarity(userAnsArr[i] || "", correct);
+                                        });
+                                        similarity = correctAnsArr.length > 0 ? totalSimilarity / correctAnsArr.length : 0;
+                                        isCorrect = similarity >= 0.9;
+                                        
+                                        userAnsDisplay = Array.isArray(userAnsArr) ? userAnsArr.join(", ") : userAnswerRaw;
+                                    } catch {
+                                        similarity = calculateSimilarity(userAnswerRaw, q.answer);
+                                        isCorrect = similarity >= 0.9;
+                                    }
+                                } else {
                                     similarity = calculateSimilarity(userAnswerRaw, q.answer);
                                     isCorrect = similarity >= 0.9;
                                 }
@@ -154,14 +164,14 @@ export const ResultScreen = () => {
                                                 {q.skill}
                                             </span>
                                         </div>
-                                        {(isMC || isWriting) && (
+                                        {(isMC || isWriting || q.skill.toLowerCase() === "speaking") && (
                                             <div className={cx(
                                                 "flex items-center gap-1.5 text-sm font-medium",
                                                 isCorrect ? "text-success-700" : "text-error-700"
                                             )}>
                                                 {isCorrect ? <CheckCircle className="size-4" /> : <XCircle className="size-4" />}
                                                 {isCorrect ? "Correct" : "Incorrect"}
-                                                {isWriting && <span className="text-xs text-tertiary ml-1">({Math.round(similarity * 100)}% match)</span>}
+                                                {(isWriting || q.skill.toLowerCase() === "speaking") && <span className="text-xs text-tertiary ml-1">({Math.round(similarity * 100)}% match)</span>}
                                             </div>
                                         )}
                                     </div>
@@ -183,7 +193,7 @@ export const ResultScreen = () => {
                                             )}
                                         </div>
 
-                                        {!isCorrect && (isMC || isWriting) && (
+                                        {!isCorrect && (isMC || isWriting || q.skill.toLowerCase() === "speaking") && (
                                             <div className="mt-1">
                                                 <div className="text-sm font-semibold text-success-700">Correct Answer:</div>
                                                 <div className="text-sm text-success-700 font-medium">
@@ -192,7 +202,7 @@ export const ResultScreen = () => {
                                             </div>
                                         )}
 
-                                        {!isMC && !isWriting && q.type === "Essay" && (
+                                        {!isMC && !isWriting && (
                                             <div className="mt-2 rounded-lg bg-brand-soft/10 border border-brand-200 p-4">
                                                 <div className="text-sm font-semibold text-brand-700">Evaluation Criteria / Sample Answer:</div>
                                                 <Markdown content={q.answer} className="mt-1 text-sm text-brand-700" />

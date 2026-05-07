@@ -13,8 +13,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    title: "Lingua AI — AI-Powered Multilingual Proficiency Testing",
-    description: "Empower your language learning with Lingua AI. Generate personalized proficiency tests for Reading, Writing, Speaking, and Listening in 12+ languages using advanced AI technology. Track your progress and master any language for free.",
+    title: "AI Lingua — AI-Powered Multilingual Proficiency Testing",
+    description: "Empower your language learning with AI Lingua. Generate personalized, always-unique proficiency tests for Reading, Writing, Speaking, and Listening in 14+ languages. Practice with fresh content every time and master any language for free.",
     icons: {
         icon: "/logo.png",
     },

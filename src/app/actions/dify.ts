@@ -1,16 +1,16 @@
 "use server";
 
-import { Question, QuestionType, SkillType } from "@/store/use-exam-store";
+import { Question, SkillType } from "@/store/use-exam-store";
 
 const DIFY_HOST = process.env.NEXT_PUBLIC_DIFY_HOST;
 const DIFY_API_KEY = process.env.NEXT_PUBLIC_DIFY_EXAMS_QUESTIONS_GENERATOR_TOKEN;
 
-export async function generateQuestionsChunk(range: string, skill: string, type: string) {
+export async function generateQuestionsChunk(range: string, skill: string) {
     if (!DIFY_HOST || !DIFY_API_KEY) {
         throw new Error("Dify configuration is missing");
     }
 
-    const prompt = `${range}, ${skill}, ${type}`;
+    const prompt = `${range}, ${skill}`;
 
     try {
         const response = await fetch(`${DIFY_HOST}/workflows/run`, {
@@ -81,30 +81,19 @@ function parseDifyCSV(raw: string): Question[] {
         let optionsStr = "";
         let answer = "";
         let skillStr = "";
-        let typeStr = "";
 
-        if (parts.length === 5) {
-            [description, optionsStr, answer, skillStr, typeStr] = parts;
-        } else if (parts.length === 4) {
-            // Handle the case from the example: description+options merged or missing separator
-            // If parts[0] contains a bracket-like structure, maybe it's combined.
-            // But let's stick to the 5 fields rule mostly.
-            [description, answer, skillStr, typeStr] = parts;
-            // If it's Multiple Choice, we might need to extract options from description if they were merged
-            if (description.includes("[") && description.includes("]")) {
-                const match = description.match(/\[.*\]/);
-                if (match) {
-                    optionsStr = match[0];
-                    description = description.replace(optionsStr, "").trim();
-                }
-            }
+        if (parts.length >= 4) {
+            [description, optionsStr, answer, skillStr] = parts;
+        } else if (parts.length === 3) {
+            [description, answer, skillStr] = parts;
+        } else if (parts.length === 2) {
+            [description, answer] = parts;
         }
 
-        const type = (typeStr || "Multiple Choice") as QuestionType;
         const skill = (skillStr || "Reading") as SkillType;
 
         let options: string[] | null = null;
-        if (type === "Multiple Choice") {
+        if (optionsStr && optionsStr !== "null") {
             try {
                 // Parse ['A','B','C','D']
                 // Replace single quotes with double quotes for JSON.parse
@@ -126,7 +115,6 @@ function parseDifyCSV(raw: string): Question[] {
             options,
             answer,
             skill,
-            type,
         });
     });
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Question, QuestionType, SkillType } from "@/store/use-exam-store";
+import { Question, SkillType } from "@/store/use-exam-store";
 import { SYSTEM_PROMPT } from "@/utils/ai-prompts";
 import { FINE_TUNE_EXAMPLES } from "@/utils/ai-examples";
 import {
@@ -120,7 +120,7 @@ async function callAnthropic(prompt: string): Promise<string> {
     return data.content?.[0]?.text || "";
 }
 
-function parseCSV(raw: string, defaultSkill: SkillType, defaultType: QuestionType): Question[] {
+function parseCSV(raw: string, defaultSkill: SkillType): Question[] {
     console.log("[groq] Raw response:", raw);
     const cleanRaw = raw.replace(/```[a-z]*\n?/gi, "").replace(/```/g, "").trim();
     let rows = cleanRaw.split("<_>").filter((r) => r.trim().length > 0);
@@ -137,17 +137,14 @@ function parseCSV(raw: string, defaultSkill: SkillType, defaultType: QuestionTyp
         let optionsStr = "null";
         let answer = "No sample answer provided.";
         let skill = defaultSkill;
-        let type = defaultType;
 
-        if (parts.length >= 5) {
+        if (parts.length >= 4) {
             optionsStr = parts[1];
             answer = parts[2];
             skill = (parts[3] || defaultSkill) as SkillType;
-            type = (parts[4] || defaultType) as QuestionType;
         } else if (parts.length >= 2) {
             answer = parts[1];
             if (parts.length >= 3) skill = parts[2] as SkillType;
-            if (parts.length >= 4) type = parts[3] as QuestionType;
         }
 
         let options: string[] | null = null;
@@ -160,19 +157,19 @@ function parseCSV(raw: string, defaultSkill: SkillType, defaultType: QuestionTyp
             }
         }
 
-        questions.push({ id: crypto.randomUUID(), description, options: options && options.length > 0 ? options : null, answer, skill, type });
+        questions.push({ id: crypto.randomUUID(), description, options: options && options.length > 0 ? options : null, answer, skill });
     });
     return questions;
 }
 
 export async function POST(req: NextRequest) {
     try {
-        const { range, skill, type, language } = await req.json();
-        if (!range || !skill || !type) {
+        const { range, skill, language } = await req.json();
+        if (!range || !skill) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const userPrompt = `question number ${range}, ['${skill}'], ['${type}']${language ? ` for ${language} language` : ""}`;
+        const userPrompt = `question number ${range}, ['${skill}']${language ? ` for ${language} language` : ""}`;
         let rawResponse = "";
 
         switch (AI_PROVIDER) {
@@ -184,7 +181,7 @@ export async function POST(req: NextRequest) {
         }
 
         console.log(`[${AI_PROVIDER}] Raw response:`, rawResponse);
-        const questions = parseCSV(rawResponse, skill as SkillType, type as QuestionType);
+        const questions = parseCSV(rawResponse, skill as SkillType);
         return NextResponse.json({ questions, raw: rawResponse });
     } catch (error: any) {
         console.error("API Error:", error);

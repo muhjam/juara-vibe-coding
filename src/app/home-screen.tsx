@@ -21,7 +21,7 @@ export const HomeScreen = () => {
             <header className="mx-auto flex w-full max-w-container items-center justify-between px-4 py-6 md:px-8">
                 <div className="flex items-center gap-2">
                     <UntitledLogoMinimal className="size-8" />
-                    <span className="text-xl font-bold text-primary">Lingua AI</span>
+                    <span className="text-xl font-bold text-primary">AI Lingua</span>
                     <Badge color="success">Free</Badge>
                 </div>
                 <ThemeToggle />
@@ -36,11 +36,11 @@ export const HomeScreen = () => {
                         </div>
 
                         <div className="flex flex-col gap-4">
-                            <h1 className="text-display-md font-semibold text-primary lg:text-display-xl">
+                            <h1 className="text-display-md font-semibold text-primary lg:text-display-lg">
                                 Master Any Language with AI-Powered Testing
                             </h1>
                             <p className="text-lg text-tertiary lg:text-xl">
-                                Generate personalized exams in seconds. Practice Reading, Writing, Speaking, and Listening in 12+ languages with custom-made questions tailored to your needs.
+                                Generate personalized exams in seconds. Practice Reading, Writing, Speaking, and Listening in 14+ languages with always-unique questions ensuring you never encounter the same test twice.
                             </p>
                         </div>
 
@@ -71,7 +71,7 @@ export const HomeScreen = () => {
 
             <footer className="mx-auto w-full max-w-container px-4 py-8 md:px-8">
                 <p className="text-center text-sm text-tertiary">
-                    &copy; 2026 Lingua AI by <a href="https://github.com/muhjam" target="_blank" className="hover:underline">Jamjam</a>. Developed with Antigravity.
+                    &copy; 2026 AI Lingua by <a href="https://github.com/muhjam" target="_blank" className="hover:underline">Jamjam</a>. Developed with Antigravity.
                 </p>
             </footer>
         </div>

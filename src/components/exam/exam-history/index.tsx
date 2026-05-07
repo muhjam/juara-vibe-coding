@@ -77,11 +77,9 @@ export const ExamHistory = () => {
 
                         <div className="flex flex-col md:flex-row md:items-center gap-2 justify-between mt-1">
                             <div className="flex gap-2 w-auto">
-                                {exam.config.types.map(t => (
-                                    <span key={t} className="text-xs text-tertiary bg-secondary px-2 py-0.5 rounded-md">
-                                        {t}
-                                    </span>
-                                ))}
+                                <span className="text-xs font-semibold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md">
+                                    {exam.config.language}
+                                </span>
                             </div>
                             <div className="flex w-full md:w-auto gap-2">
                                 <Button

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type QuestionType = "Multiple Choice" | "Essay";
 export type SkillType = "Reading" | "Writing" | "Speaking" | "Listening";
 
 export interface Question {
@@ -10,14 +9,12 @@ export interface Question {
     options: string[] | null;
     answer: string;
     skill: SkillType;
-    type: QuestionType;
 }
 
 export interface ExamConfig {
     language: string;
     questionCount: number;
     skills: SkillType[];
-    types: QuestionType[];
 }
 
 export type ExamStatus = "idle" | "generating" | "ongoing" | "completed";

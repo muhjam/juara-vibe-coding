@@ -1,8 +1,8 @@
-# Lingua AI - Master Any Language with AI
+# AI Lingua - Master Any Language with AI
 
-Lingua AI is a modern, AI-powered language assessment platform built with Next.js and Gemini AI. It allows users to generate personalized exams in 12+ languages across multiple skills including Reading, Writing, Speaking, and Listening.
+AI Lingua is a modern, AI-powered language assessment platform built with Next.js and Gemini AI. It allows users to generate personalized, always-unique exams in 14+ languages across multiple skills including Reading, Writing, Speaking, and Listening, ensuring you never practice with the same questions twice.
 
-![Lingua AI Banner](https://images.unsplash.com/photo-1451187530220-4e2a143521a3?auto=format&fit=crop&q=80&w=2070)
+![AI Lingua Banner](https://images.unsplash.com/photo-1451187530220-4e2a143521a3?auto=format&fit=crop&q=80&w=2070)
 
 ## 🚀 Features
 

@@ -64,14 +64,13 @@ export const PlaygroundScreen = () => {
 
                 const config = activeExam.config;
                 const skill = config.skills[Math.floor(Math.random() * config.skills.length)];
-                const type = config.types[Math.floor(Math.random() * config.types.length)];
 
-                const prompt = `${range}, ['${skill}'], ['${type}']`;
+                const prompt = `${range}, ['${skill}']`;
 
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ range, skill, type, language: config.language }),
+                    body: JSON.stringify({ range, skill, language: config.language }),
                 });
 
                 const chunkData = await response.json();
@@ -280,9 +279,6 @@ export const PlaygroundScreen = () => {
                                 <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[10px] md:text-xs font-semibold text-brand-700">
                                     {currentQuestion.skill}
                                 </span>
-                                <span className="rounded-full bg-secondary-subtle px-2.5 py-0.5 text-[10px] md:text-xs font-semibold text-tertiary">
-                                    {currentQuestion.type}
-                                </span>
                             </div>
                             {/* <Button color="tertiary" size="sm" iconLeading={Flag01} className="max-md:px-2" /> */}
                         </div>
@@ -345,7 +341,7 @@ export const PlaygroundScreen = () => {
                                     isRecording={isRecording}
                                     setIsRecording={setIsRecording}
                                 />
-                            ) : currentQuestion.skill.toLowerCase() === "writing" ? null : currentQuestion.type === "Multiple Choice" ? (
+                            ) : currentQuestion.skill.toLowerCase() === "writing" ? null : currentQuestion.options ? (
                                 <QuestionOptions
                                     options={currentQuestion.options || []}
                                     value={userAnswers[currentQuestion.id] || ""}

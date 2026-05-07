@@ -7,7 +7,7 @@ import { Checkbox } from "../../base/checkbox/checkbox";
 import { Input } from "../../base/input/input";
 import { Label } from "../../base/input/label";
 import { Select } from "../../base/select/select";
-import { SkillType, QuestionType, useExamStore } from "../../../store/use-exam-store";
+import { SkillType, useExamStore } from "../../../store/use-exam-store";
 
 const LANGUAGES = [
     { id: "English", label: "English" },
@@ -33,7 +33,6 @@ export const ConfigForm = () => {
     const [language, setLanguage] = useState("English");
     const [questionCount, setQuestionCount] = useState(10);
     const [selectedSkills, setSelectedSkills] = useState<SkillType[]>(["Reading"]);
-    const [selectedTypes, setSelectedTypes] = useState<QuestionType[]>(["Multiple Choice"]);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGenerate = () => {
@@ -46,20 +45,10 @@ export const ConfigForm = () => {
                 return;
             }
 
-            // Map skills to their appropriate types automatically
-            const types: QuestionType[] = [];
-            if (selectedSkills.includes("Reading") || selectedSkills.includes("Listening")) {
-                types.push("Multiple Choice");
-            }
-            if (selectedSkills.includes("Writing") || selectedSkills.includes("Speaking")) {
-                types.push("Essay");
-            }
-
             const examId = createNewExam({
                 language,
                 questionCount,
                 skills: selectedSkills,
-                types: types,
             });
             router.push(`/playground/${examId}`);
         } catch (e) {
@@ -77,7 +66,7 @@ export const ConfigForm = () => {
     return (
         <div className="flex w-full max-w-md flex-col gap-8 rounded-2xl border border-secondary bg-primary p-6 shadow-sm">
             <div className="flex flex-col gap-2">
-                <h2 className="text-display-xs font-semibold text-primary">Setup Your Lingua AI Exam</h2>
+                <h2 className="text-display-xs font-semibold text-primary">Setup Your AI Lingua Exam</h2>
                 <p className="text-md text-tertiary">Configure the exam parameters to generate AI-powered questions.</p>
             </div>
 
