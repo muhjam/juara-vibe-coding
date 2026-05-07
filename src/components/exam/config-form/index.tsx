@@ -22,6 +22,8 @@ const LANGUAGES = [
     { id: "Portuguese", label: "Portuguese (Português)" },
     { id: "Russian", label: "Russian (Русский)" },
     { id: "Hindi", label: "Hindi (हिन्दी)" },
+    { id: "Sundanese", label: "Sundanese (Basa Sunda)" },
+    { id: "Javanese", label: "Javanese (Basa Jawa)" },
 ];
 
 export const ConfigForm = () => {
@@ -75,7 +77,7 @@ export const ConfigForm = () => {
     return (
         <div className="flex w-full max-w-md flex-col gap-8 rounded-2xl border border-secondary bg-primary p-6 shadow-sm">
             <div className="flex flex-col gap-2">
-                <h2 className="text-display-xs font-semibold text-primary">Setup Your Fasih AI Exam</h2>
+                <h2 className="text-display-xs font-semibold text-primary">Setup Your Lingua AI Exam</h2>
                 <p className="text-md text-tertiary">Configure the exam parameters to generate AI-powered questions.</p>
             </div>
 

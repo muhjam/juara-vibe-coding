@@ -1,56 +1,68 @@
-# Untitled UI starter kit for Next.js
+# Lingua AI - Master Any Language with AI
 
-This is an official Untitled UI starter kit for Next.js. Kickstart your Untitled UI project with Next.js in seconds.
+Lingua AI is a modern, AI-powered language assessment platform built with Next.js and Gemini AI. It allows users to generate personalized exams in 12+ languages across multiple skills including Reading, Writing, Speaking, and Listening.
 
-## Untitled UI React
+![Lingua AI Banner](https://images.unsplash.com/photo-1451187530220-4e2a143521a3?auto=format&fit=crop&q=80&w=2070)
 
-[Untitled UI React](https://www.untitledui.com/react) is the world’s largest collection of open-source React UI components. Everything you need to design and develop modern, beautiful interfaces—fast.
+## 🚀 Features
 
-Built with React 19.1, Tailwind CSS v4.1, TypeScript 5.8, and React Aria, Untitled UI React components deliver modern performance, type safety, and maintainability.
+- **AI-Powered Generation**: Instantly create unique exams tailored to your level and target language using Google Gemini.
+- **Multilingual Support**: Learn English, Japanese, Korean, French, Spanish, Mandarin, Arabic, German, Italian, Portuguese, Russian, Hindi, Sundanese, or Javanese.
+- **Skill-Based Testing**:
+  - **Reading**: Comprehension questions based on AI-generated texts.
+  - **Writing**: Essay and fill-in-the-blank tasks with character-similarity scoring.
+  - **Speaking**: Real-time voice recognition with live transcription feedback.
+  - **Listening**: (Coming Soon) AI-generated audio for comprehension tasks.
+- **Smart Evaluation**: Automated scoring and feedback to help you improve faster.
+- **Beautiful UI**: Built with the premium **Untitled UI** design system for a sleek, modern, and accessible experience.
+- **Dark Mode**: Fully supports light and dark themes.
 
-[Learn more](https://www.untitledui.com/react) • [Documentation](https://www.untitledui.com/react/docs/introduction) • [Figma](https://www.untitledui.com/figma) • [FAQs](https://www.untitledui.com/faqs)
+## 🛠️ Tech Stack
 
-## Getting started
+- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
+- **UI System**: [Untitled UI React](https://www.untitledui.com/react)
+- **Styling**: Tailwind CSS v4
+- **AI Engine**: Google Gemini API
+- **State Management**: Zustand
+- **Icons**: Untitled UI Icons
+- **Voice**: Web Speech API
 
-First, run the development server:
+## 🏁 Getting Started
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Prerequisites
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Node.js 18+ 
+- Google Gemini API Key
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Installation
 
-## Resources
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/muhjam/lingua-ai.git
+   ```
 
-Untitled UI React is built on top of [Untitled UI Figma](https://www.untitledui.com/figma), the world's largest and most popular Figma UI kit and design system. Explore more:
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-**[Untitled UI Figma:](https://www.untitledui.com/react/resources/figma-files)** The world's largest Figma UI kit and design system.
-<br/>
-**[Untitled UI Icons:](https://www.untitledui.com/react/resources/icons)** A clean, consistent, and neutral icon library crafted specifically for modern UI design.
-<br/>
-**[Untitled UI file icons:](https://www.untitledui.com/react/resources/file-icons)** Free file format icons, designed specifically for modern web and UI design.
-<br/>
-**[Untitled UI flag icons:](https://www.untitledui.com/react/resources/flag-icons)** Free country flag icons, designed specifically for modern web and UI design.
-<br/>
-**[Untitled UI avatars:](https://www.untitledui.com/react/resources/avatars)** Free placeholder user avatars and profile pictures to use in your projects.
-<br/>
-**[Untitled UI logos:](https://www.untitledui.com/react/resources/logos)** Free fictional company logos to use in your projects.
+3. Configure environment variables:
+   Create a `.env.local` file in the root directory:
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   ```
 
-## License
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-Untitled UI React open-source components are licensed under the MIT license, which means you can use them for free in unlimited commercial projects.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-> [!NOTE]
-> This license applies only to the starter kit and to the components included in this open-source repository. [Untitled UI React PRO](https://www.untitledui.com/react) includes hundreds more advanced UI components and page examples and is subject to a separate [license agreement](https://www.untitledui.com/license).
+## 📝 License
 
-[Untitled UI license agreement →](https://www.untitledui.com/license)
+This project is licensed under the MIT License.
 
-[Frequently asked questions →](https://www.untitledui.com/faqs)
+---
+
+Developed with ❤️ by [Jamjam](https://github.com/muhjam) using **Antigravity AI**.

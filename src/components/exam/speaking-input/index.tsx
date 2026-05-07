@@ -25,6 +25,8 @@ const LANG_MAP: Record<string, string> = {
     Portuguese: "pt-PT",
     Russian: "ru-RU",
     Hindi: "hi-IN",
+    Sundanese: "su-ID",
+    Javanese: "jv-ID",
 };
 
 export const SpeakingInput = ({ value, onChange, language, isRecording, setIsRecording }: SpeakingInputProps) => {
