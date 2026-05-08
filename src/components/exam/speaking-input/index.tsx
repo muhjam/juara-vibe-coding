@@ -3,6 +3,7 @@
 import { Microphone01, StopCircle, Zap } from "@untitledui/icons";
 import { useState, useRef, useEffect } from "react";
 import { cx } from "@/utils/cx";
+import { useToast } from "@/contexts/use-toast";
 
 interface SpeakingInputProps {
     value: string;
@@ -30,110 +31,96 @@ const LANG_MAP: Record<string, string> = {
 };
 
 export const SpeakingInput = ({ value, onChange, language, isRecording, setIsRecording }: SpeakingInputProps) => {
-    const [interimTranscript, setInterimTranscript] = useState("");
-    const recognitionRef = useRef<any>(null);
-    const transcriptRef = useRef("");
-    const shouldRestartRef = useRef(false);
-
-    // Sync ref with prop value when not recording
-    useEffect(() => {
-        if (!isRecording) {
-            transcriptRef.current = value;
-        }
-    }, [value, isRecording]);
+    const { toastError, toastSuccess } = useToast();
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
     // Clean up on unmount
     useEffect(() => {
         return () => {
-            if (recognitionRef.current) {
-                recognitionRef.current.stop();
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+                mediaRecorderRef.current.stop();
             }
+            if (audioUrl) URL.revokeObjectURL(audioUrl);
         };
-    }, []);
+    }, [audioUrl]);
 
-    const startRecording = () => {
-        if (typeof window === "undefined" || !("webkitSpeechRecognition" in window)) {
-            // Fallback
-            setIsRecording(true);
-            setTimeout(() => {
-                onChange("(Speech recognition not supported in this browser)");
-                setIsRecording(false);
-            }, 2000);
-            return;
-        }
+    const startRecording = async () => {
+        try {
+            // Stop any ongoing TTS before starting recording
+            if (typeof window !== "undefined" && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
 
-        const SpeechRecognition = (window as any).webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        
-        recognition.lang = LANG_MAP[language] || "en-US";
-        recognition.interimResults = true;
-        recognition.continuous = true;
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            chunksRef.current = [];
 
-        recognition.onstart = () => {
-            setIsRecording(true);
-            setInterimTranscript("");
-            transcriptRef.current = "";
-            shouldRestartRef.current = true;
-            onChange(""); 
-        };
-
-        recognition.onresult = (event: any) => {
-            let finalTranscript = "";
-            let currentInterim = "";
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcript;
-                } else {
-                    currentInterim += transcript;
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    chunksRef.current.push(e.data);
                 }
-            }
+            };
 
-            if (finalTranscript) {
-                transcriptRef.current += (transcriptRef.current ? " " : "") + finalTranscript;
-                onChange(transcriptRef.current);
-            }
-            setInterimTranscript(currentInterim);
-        };
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+                const url = URL.createObjectURL(audioBlob);
+                setAudioUrl(url);
+                
+                // Automatically transcribe once recording stops
+                handleTranscription(audioBlob);
+                
+                // Stop all tracks in the stream
+                stream.getTracks().forEach(track => track.stop());
+            };
 
-        recognition.onerror = (event: any) => {
-            console.error("Speech recognition error", event.error);
-            shouldRestartRef.current = false;
+            mediaRecorder.start();
+            setIsRecording(true);
+            onChange(""); 
+        } catch (err: any) {
+            console.error("Failed to start recording:", err);
+            toastError("Could not access microphone. Please check your permissions.", "Microphone Error");
             setIsRecording(false);
-        };
-
-        recognition.onend = () => {
-            if (shouldRestartRef.current && isRecording) {
-                // Add a small delay to avoid rapid-fire restarts
-                setTimeout(() => {
-                    if (shouldRestartRef.current && isRecording && recognitionRef.current) {
-                        try {
-                            recognitionRef.current.start();
-                        } catch (e) {
-                            console.error("Failed to restart recognition:", e);
-                            setIsRecording(false);
-                            shouldRestartRef.current = false;
-                        }
-                    }
-                }, 500);
-            } else {
-                setIsRecording(false);
-                setInterimTranscript("");
-            }
-        };
-
-        recognitionRef.current = recognition;
-        recognition.start();
+        }
     };
 
     const stopRecording = () => {
-        shouldRestartRef.current = false;
-        if (recognitionRef.current) {
-            recognitionRef.current.stop();
-            recognitionRef.current = null;
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+            mediaRecorderRef.current.stop();
         }
         setIsRecording(false);
+    };
+
+    const handleTranscription = async (blob: Blob) => {
+        setIsTranscribing(true);
+        try {
+            const formData = new FormData();
+            formData.append("file", blob, "recording.webm");
+            formData.append("language", language);
+
+            const response = await fetch("/api/transcribe", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Transcription failed");
+
+            if (!data.text || data.text.trim() === "") {
+                toastError("No speech detected. Please speak more clearly or check your mic.", "Empty Result");
+            } else {
+                onChange(data.text);
+                toastSuccess("Voice transcribed successfully!", "Success");
+            }
+        } catch (err: any) {
+            console.error("Transcription Error:", err);
+            toastError(err.message || "Failed to transcribe audio. Please try again.", "Transcription Error");
+        } finally {
+            setIsTranscribing(false);
+        }
     };
 
     const toggleRecording = () => {
@@ -149,56 +136,74 @@ export const SpeakingInput = ({ value, onChange, language, isRecording, setIsRec
             <div className="relative">
                 <button
                     onClick={toggleRecording}
+                    disabled={isTranscribing}
                     className={cx(
                         "relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-500 shadow-xl",
                         isRecording
                             ? "bg-error-500 text-white scale-110 ring-8 ring-error-100"
+                            : isTranscribing
+                            ? "bg-brand-100 text-brand-600 cursor-not-allowed"
                             : "bg-white text-brand-600 border-2 border-brand-200 hover:border-brand-500 hover:scale-105"
                     )}
                 >
                     {isRecording && (
                         <span className="absolute inset-0 rounded-full bg-error-500 animate-ping opacity-20" />
                     )}
-                    {isRecording
-                        ? <StopCircle className="w-12 h-12 relative z-10" />
-                        : <Microphone01 className="w-12 h-12 relative z-10" />
-                    }
+                    {isTranscribing ? (
+                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-brand-600 border-t-transparent" />
+                    ) : isRecording ? (
+                        <StopCircle className="w-12 h-12 relative z-10" />
+                    ) : (
+                        <Microphone01 className="w-12 h-12 relative z-10" />
+                    )}
                 </button>
             </div>
 
             <div className="flex flex-col items-center gap-2 text-center">
                 <p className="text-md font-semibold text-primary">
-                    {isRecording ? "Listening... Speak now" : value ? "Recording Complete" : "Ready to Record"}
+                    {isRecording ? "Listening... Speak now" : isTranscribing ? "Transcribing audio..." : value ? "Recording Complete" : "Ready to Record"}
                 </p>
                 <p className="text-sm text-tertiary">
                     {isRecording
                         ? "Click the red button when you're finished."
+                        : isTranscribing
+                        ? "Wait a moment while we process your voice..."
                         : value
                         ? "Click the mic again to replace your recording."
                         : "Click the mic and wait for the red circle."}
                 </p>
             </div>
 
-            {(isRecording || value) && (
+            {(isRecording || isTranscribing || value) && (
                 <div className="w-full max-w-lg rounded-2xl border-2 border-dashed border-secondary bg-secondary/30 p-6 transition-all duration-300">
                     <div className="flex items-start gap-3">
-                        <Zap className={cx("size-5 mt-0.5", isRecording ? "text-brand-500 animate-pulse" : "text-tertiary")} />
+                        <Zap className={cx("size-5 mt-0.5", (isRecording || isTranscribing) ? "text-brand-500 animate-pulse" : "text-tertiary")} />
                         <div className="flex-1">
-                            <p className="text-xs font-bold uppercase tracking-wider text-tertiary mb-2">Live Transcript</p>
-                            <p className={cx(
-                                "text-lg font-medium leading-relaxed",
-                                isRecording ? "text-primary" : "text-secondary"
+                            <p className="text-xs font-bold uppercase tracking-wider text-tertiary mb-2">
+                                {isRecording ? "Recording..." : isTranscribing ? "AI is transcribing..." : "Transcript"}
+                            </p>
+                            <div className={cx(
+                                "text-lg font-medium leading-relaxed min-h-[1.5em]",
+                                isTranscribing ? "text-tertiary italic" : "text-primary"
                             )}>
                                 {isRecording ? (
-                                    <>
-                                        {value}
-                                        <span className="text-brand-600">{interimTranscript}</span>
-                                        <span className="inline-block w-1 h-5 ml-1 bg-brand-500 animate-pulse align-middle" />
-                                    </>
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-brand-600 font-semibold animate-pulse">Listening to your voice...</p>
+                                        {value && <p className="text-sm text-tertiary opacity-60 italic">Previous: {value}</p>}
+                                    </div>
+                                ) : isTranscribing ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex gap-1">
+                                            <div className="w-1 h-4 bg-brand-500 animate-bounce [animation-delay:-0.3s]" />
+                                            <div className="w-1 h-4 bg-brand-500 animate-bounce [animation-delay:-0.15s]" />
+                                            <div className="w-1 h-4 bg-brand-500 animate-bounce" />
+                                        </div>
+                                        <span>Converting speech to text...</span>
+                                    </div>
                                 ) : (
                                     value || "No speech detected yet..."
                                 )}
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>

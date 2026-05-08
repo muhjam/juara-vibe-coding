@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/base/buttons/button";
 import { ProgressBar } from "@/components/base/progress-indicators/progress-indicators";
 import { Card } from "@/components/base/card";
@@ -21,6 +21,7 @@ export const PlaygroundView = () => {
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const [isRecording, setIsRecording] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
+    const recognitionRef = useRef<any>(null);
 
     // Get the key for the active provider
     const activeCustomKey = customApiKeys[provider];
@@ -115,24 +116,43 @@ export const PlaygroundView = () => {
     const toggleRecording = () => {
         if (isRecording) {
             setIsRecording(false);
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.stop();
+                } catch (e) {}
+                recognitionRef.current = null;
+            }
             return;
         }
-        setIsRecording(true);
-        // Use Web Speech API for transcription
-        if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
-            const SpeechRecognition = (window as any).webkitSpeechRecognition;
+
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        
+        if (typeof window !== "undefined" && SpeechRecognition) {
+            setIsRecording(true);
             const recognition = new SpeechRecognition();
+            recognitionRef.current = recognition;
+            
             recognition.lang = config?.language === "Japanese" ? "ja-JP" : "en-US";
             recognition.onresult = (event: any) => {
                 const transcript = event.results[0][0].transcript;
                 setAnswers(prev => ({ ...prev, [currentIndex]: transcript }));
                 setIsRecording(false);
             };
-            recognition.onerror = () => setIsRecording(false);
+            recognition.onerror = (event: any) => {
+                console.error("Speech recognition error:", event.error);
+                setIsRecording(false);
+            };
             recognition.onend = () => setIsRecording(false);
-            recognition.start();
+            
+            try {
+                recognition.start();
+            } catch (err) {
+                console.error("Failed to start recognition:", err);
+                setIsRecording(false);
+            }
         } else {
             // Fallback
+            setIsRecording(true);
             setTimeout(() => {
                 setAnswers(prev => ({ ...prev, [currentIndex]: "(Rekaman audio tidak didukung di browser ini)" }));
                 setIsRecording(false);
