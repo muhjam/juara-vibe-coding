@@ -258,10 +258,13 @@ export const ConfigForm = () => {
 
                             {/* Key Toggle - Only if custom API key exists for CURRENT provider */}
                             {hasActiveCustomKey && (
-                                <div className="flex items-center justify-between rounded-lg border border-success-200 bg-success-25 p-3">
+                                <div className={cx(
+                                    "flex items-center justify-between rounded-xl border p-3 transition-all duration-300",
+                                    "border-success-200 bg-success-25 dark:border-success-500/30 dark:bg-success-500/5"
+                                )}>
                                     <div className="flex flex-col gap-0.5">
-                                        <p className="text-sm font-semibold text-success-800">Use Personal {provider.toUpperCase()} Key</p>
-                                        <p className="text-xs text-success-600">Bypass global usage limits.</p>
+                                        <p className="text-sm font-semibold text-success-800 dark:text-success-300">Use Personal {provider.toUpperCase()} Key</p>
+                                        <p className="text-xs text-success-600 dark:text-success-400/80">Bypass global usage limits.</p>
                                     </div>
                                     <Checkbox
                                         isSelected={usePersonalKey}
