@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    title: "Vibe Language — AI-Powered Multilingual Proficiency Testing",
+    title: "Vibe Language by Jamjam | AI-Powered Multilingual Proficiency Testing",
     description: "Empower your language learning with Vibe Language. Generate personalized, always-unique proficiency tests for Reading, Writing, Speaking, and Listening in 14+ languages. Practice with fresh content every time and master any language for free.",
     icons: {
         icon: "/logo.png",
