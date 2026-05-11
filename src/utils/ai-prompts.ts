@@ -24,8 +24,8 @@ description |-> options |-> answer |-> skill <_>
 
 IMPORTANT: 
 - Use EXACTLY three "|->" separators per question.
-- Support non-Latin characters (Japanese, Chinese, Arabic, etc.) and ensure the output is properly encoded in UTF-8.
-- If the target language is Japanese, the content MUST be in Japanese (Kanji/Kana).
-- Do not add any extra "|->" inside the description or answer.
-- If you need to use a separator inside text, use a colon or dash instead.
+- DANGER: NEVER use the character "|" anywhere inside the description, options, or answer except as the separator. Use a dash (-) instead if needed.
+- Support non-Latin characters (Japanese, Chinese, Arabic, Korean, etc.) and ensure the output is properly encoded in UTF-8.
+- If the target language is non-Latin, the content MUST be in that language.
+- DO NOT include internal instructions, "MUST be written", or formatting comments in the output.
 - NO opening remarks, NO markdown code blocks. Just the RAW CSV string.`;

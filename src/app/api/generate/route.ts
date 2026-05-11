@@ -126,6 +126,17 @@ function parseCSV(raw: string, defaultSkill: SkillType): Question[] {
         const parts = row.split("|->").map((p) => p.trim()).filter(p => p !== "");
 
         let description = parts[0] || "No description provided by AI.";
+        
+        // Clean up common AI hallucinations/instructions
+        description = description.replace(/MUST_be_written_in_this_format_is_replaced_by_this_line:?/gi, "").trim();
+        if (description.includes(":")) {
+            // If it starts with some prefix like "Reading: ", clean it
+            const colonIndex = description.indexOf(":");
+            if (colonIndex < 20 && !description.includes("<")) { // Only if it looks like a short prefix
+                 description = description.slice(colonIndex + 1).trim();
+            }
+        }
+
         let optionsStr = "null";
         let answer = "No sample answer provided.";
         let skill = defaultSkill;
