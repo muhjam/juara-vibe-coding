@@ -15,7 +15,7 @@ export const ResultScreen = () => {
     const params = useParams();
     const id = params.id as string;
     const activeExam = useActiveExam();
-    const { selectExam, exams } = useExamStore();
+    const { selectExam, exams, retryActiveExam } = useExamStore();
 
     // Sync active exam with URL
     useEffect(() => {
@@ -59,17 +59,16 @@ export const ResultScreen = () => {
                         totalSimilarity += calculateSimilarity(userAnsArr[idx] || "", correct);
                     });
                     
-                    const avgSimilarity = totalSimilarity / correctAnsArr.length;
-                    return avgSimilarity >= 0.9;
-                } else {
-                    // For speaking, it's a simple string comparison
-                    return calculateSimilarity(userAnswerRaw, q.answer) >= 0.9;
+                    const averageSimilarity = totalSimilarity / correctAnsArr.length;
+                    return averageSimilarity >= 0.8;
                 }
-            } catch (e) {
-                // Fallback for old simple string answers
-                return calculateSimilarity(userAnswerRaw, q.answer) >= 0.9;
+                
+                return calculateSimilarity(userAnswerRaw, q.answer) >= 0.7;
+            } catch {
+                return calculateSimilarity(userAnswerRaw, q.answer) >= 0.7;
             }
         }
+        
         return false;
     }).length;
 
@@ -78,7 +77,8 @@ export const ResultScreen = () => {
         : 100;
 
     const handleRestart = () => {
-        router.push("/");
+        retryActiveExam();
+        router.push(`/playground/${activeExam.id}`);
     };
 
     return (
@@ -103,7 +103,7 @@ export const ResultScreen = () => {
 
                     <div className="flex items-center gap-3">
                         <Button color="secondary" size="lg" iconLeading={RefreshCcw01} onClick={handleRestart}>
-                            New Test
+                            Retry Test
                         </Button>
                         <Button size="lg" iconLeading={Home01} onClick={() => router.push("/")}>
                             Back to Home
