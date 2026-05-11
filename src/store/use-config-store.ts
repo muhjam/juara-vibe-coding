@@ -106,8 +106,8 @@ export const DEFAULT_MODELS: Record<AIProvider, AIModel[]> = {
         { id: "mixtral-8x7b-32768", name: "Mixtral 8x7B", provider: "groq" },
     ],
     gemini: [
-        { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash", provider: "gemini" },
-        { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro", provider: "gemini" },
+        { id: "gemini-1.5-flash-latest", name: "Gemini 1.5 Flash", provider: "gemini" },
+        { id: "gemini-1.5-pro-latest", name: "Gemini 1.5 Pro", provider: "gemini" },
     ],
     openai: [
         { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "openai" },

@@ -12,6 +12,7 @@ import { AudioPlayer } from "../../components/exam/audio-player";
 import { SpeakingInput } from "../../components/exam/speaking-input";
 import { ThemeToggle } from "../../components/foundations/theme-toggle";
 import { useExamStore, useActiveExam, Question } from "../../store/use-exam-store";
+import { useConfigStore } from "../../store/use-config-store";
 import { cx } from "../../utils/cx";
 import { Markdown } from "../../components/shared-assets/markdown";
 import { Dialog, DialogTrigger, Modal, ModalOverlay } from "../../components/application/modals/modal";
@@ -45,6 +46,13 @@ export const PlaygroundScreen = () => {
     const [isRecording, setIsRecording] = useState(false);
     const isGenerating = useRef(false);
 
+    const { 
+        provider, 
+        modelName, 
+        customApiKeys, 
+        usePersonalKey 
+    } = useConfigStore();
+
     const generateAllQuestions = useCallback(async () => {
         if (isGenerating.current || !activeExam) return;
         isGenerating.current = true;
@@ -58,8 +66,7 @@ export const PlaygroundScreen = () => {
         const chunks = Math.ceil(total / chunkSize);
 
         let allQuestions: Question[] = [];
-        let hasErrorOccurred = false;
-
+        
         try {
             for (let i = 0; i < chunks; i++) {
                 const range = `question number ${i + 1}`;
@@ -69,17 +76,22 @@ export const PlaygroundScreen = () => {
                 const response = await fetch("/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ range, skill, language: config.language }),
+                    body: JSON.stringify({ 
+                        range, 
+                        skill, 
+                        language: config.language,
+                        provider,
+                        model: modelName,
+                        customApiKey: usePersonalKey ? customApiKeys[provider] : undefined
+                    }),
                 });
 
                 const chunkData = await response.json();
 
                 if (!response.ok) {
-                    hasErrorOccurred = true;
                     const errorMessage = chunkData.error || "Reached usage limit or API error.";
                     
                     if (allQuestions.length > 0) {
-                        // If we have some questions, stop here but use what we have
                         toastWarning(
                             `Generation partially stopped: ${errorMessage}. Using ${allQuestions.length} questions.`, 
                             "Partial Content Generated"
@@ -99,7 +111,6 @@ export const PlaygroundScreen = () => {
                 throw new Error("AI failed to generate any questions. Please try again.");
             }
 
-            // Set whatever we managed to generate
             setQuestions(allQuestions);
             setStatus("ongoing");
         } catch (err: any) {
@@ -116,7 +127,7 @@ export const PlaygroundScreen = () => {
         } finally {
             isGenerating.current = false;
         }
-    }, [activeExam, setStatus, setQuestions, toastError, toastWarning, router, deleteExam]);
+    }, [activeExam, setStatus, setQuestions, toastError, toastWarning, router, deleteExam, provider, modelName, customApiKeys, usePersonalKey]);
     
     // Sync active exam with URL
     useEffect(() => {

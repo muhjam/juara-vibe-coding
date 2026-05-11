@@ -13,6 +13,11 @@ async function callGemini(prompt: string, model: string, customKey?: string): Pr
     const apiKey = customKey || DEFAULT_GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
+    // Map legacy or shorthand IDs to correct ones
+    let modelId = model.startsWith("models/") ? model.split("/")[1] : model;
+    if (modelId === "gemini-1.5-flash") modelId = "gemini-1.5-flash-latest";
+    if (modelId === "gemini-1.5-pro") modelId = "gemini-1.5-pro-latest";
+
     const contents = [
         ...FINE_TUNE_EXAMPLES.map(ex => ({
             role: ex.role === "assistant" ? "model" : "user",
@@ -21,19 +26,32 @@ async function callGemini(prompt: string, model: string, customKey?: string): Pr
         { role: "user", parts: [{ text: prompt }] }
     ];
 
-    const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                contents
-            }),
-        }
-    );
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`;
+    
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+        },
+        body: JSON.stringify({
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents,
+            generationConfig: {
+                temperature: 1,
+                topP: 0.95,
+                topK: 40,
+                maxOutputTokens: 8192,
+            }
+        }),
+    });
+    
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || "Gemini API error");
+    if (!res.ok) {
+        console.error("Gemini Error Detail:", JSON.stringify(data, null, 2));
+        throw new Error(data.error?.message || `Gemini API error (${res.status})`);
+    }
+    
     return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
@@ -126,14 +144,14 @@ function parseCSV(raw: string, defaultSkill: SkillType): Question[] {
         const parts = row.split("|->").map((p) => p.trim()).filter(p => p !== "");
 
         let description = parts[0] || "No description provided by AI.";
-        
+
         // Clean up common AI hallucinations/instructions
         description = description.replace(/MUST_be_written_in_this_format_is_replaced_by_this_line:?/gi, "").trim();
         if (description.includes(":")) {
             // If it starts with some prefix like "Reading: ", clean it
             const colonIndex = description.indexOf(":");
             if (colonIndex < 20 && !description.includes("<")) { // Only if it looks like a short prefix
-                 description = description.slice(colonIndex + 1).trim();
+                description = description.slice(colonIndex + 1).trim();
             }
         }
 
@@ -168,7 +186,7 @@ function parseCSV(raw: string, defaultSkill: SkillType): Question[] {
 export async function POST(req: NextRequest) {
     try {
         const { range, skill, language, provider, model, customApiKey } = await req.json();
-        
+
         if (!range || !skill) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
