@@ -77,8 +77,8 @@ export const ConfigForm = () => {
             return;
         }
 
-        if (questionCount <= 0) {
-            toastError("Number of questions must be at least 1.", "Invalid Count");
+        if (questionCount <= 0 || questionCount > 10) {
+            toastError("Number of questions must be between 1 and 10 during Beta.", "Invalid Count");
             return;
         }
 
@@ -94,7 +94,7 @@ export const ConfigForm = () => {
                 questionCount,
                 skills: selectedSkills,
             });
-            
+
             toastSuccess("Creating your exam questions now.", "Success");
             router.push(`/playground/${examId}`);
         } catch (e) {
@@ -121,7 +121,7 @@ export const ConfigForm = () => {
 
     const currentStatus = connectionStatuses[provider];
     const dotColor = currentStatus === "connected" ? "success" : currentStatus === "no-quota" ? "warning" : "error";
-    
+
     // Check if the current provider has a custom key
     const hasActiveCustomKey = !!customApiKeys[provider];
 
@@ -177,11 +177,14 @@ export const ConfigForm = () => {
                         value={questionCount.toString()}
                         onChange={(val: string) => {
                             const num = parseInt(val) || 0;
-                            setQuestionCount(Math.max(0, Math.min(100, num)));
+                            setQuestionCount(Math.max(0, Math.min(10, num)));
                         }}
                         placeholder="E.g. 10"
                         icon={File06}
                     />
+                    <p className="text-xs text-tertiary italic mt-1 px-1">
+                        Note: Max 10 questions during Beta Version.
+                    </p>
                 </div>
 
                 {/* Advanced Toggle */}
