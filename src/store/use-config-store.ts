@@ -127,10 +127,14 @@ export const useConfigStore = create<ConfigState>()(
 
 export const DEFAULT_MODELS: Record<AIProvider, AIModel[]> = {
     groq: [
-        { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek R1 70B", provider: "groq" },
         { id: "llama-3.3-70b-versatile", name: "Llama 3.3 70B", provider: "groq" },
         { id: "llama-3.1-8b-instant", name: "Llama 3.1 8B", provider: "groq" },
-        { id: "mixtral-8x7b-32768", name: "Mixtral 8x7B", provider: "groq" },
+        { id: "openai/gpt-oss-120b", name: "GPT OSS 120B", provider: "groq" },
+        { id: "openai/gpt-oss-20b", name: "GPT OSS 20B", provider: "groq" },
+        { id: "groq/compound", name: "Groq Compound", provider: "groq" },
+        { id: "groq/compound-mini", name: "Groq Compound Mini", provider: "groq" },
+        { id: "meta-llama/llama-4-scout-17b-16e-instruct", name: "Llama 4 Scout 17B", provider: "groq" },
+        { id: "qwen/qwen3-32b", name: "Qwen 3 32B", provider: "groq" },
     ],
     gemini: [
         { id: "gemini-3-flash-preview", name: "Gemini 3 Flash (Preview)", provider: "gemini" },
