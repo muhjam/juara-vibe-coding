@@ -1,6 +1,7 @@
 // Server-side only (used in API routes)
-export const AI_PROVIDER = process.env.NEXT_PUBLIC_AI_PROVIDER;
-export const AI_MODEL_NAME = process.env.NEXT_PUBLIC_AI_MODEL_NAME;
+// Priority: Non-public (server-side runtime) > Public (client-side build-time)
+export const AI_PROVIDER = process.env.AI_PROVIDER || process.env.NEXT_PUBLIC_AI_PROVIDER;
+export const AI_MODEL_NAME = process.env.AI_MODEL_NAME || process.env.NEXT_PUBLIC_AI_MODEL_NAME;
 
 // API Keys (Server Only)
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;

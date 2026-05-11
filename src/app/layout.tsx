@@ -26,6 +26,8 @@ export const viewport: Viewport = {
     colorScheme: "light dark",
 };
 
+import { ConfigProvider } from "../providers/config-provider";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -36,10 +38,12 @@ export default function RootLayout({
             <body className={cx(inter.variable, "bg-primary antialiased")}>
                 <RouteProvider>
                     <Theme>
-                        <ToastProvider>
-                            {children}
-                            <GlobalToast />
-                        </ToastProvider>
+                        <ConfigProvider>
+                            <ToastProvider>
+                                {children}
+                                <GlobalToast />
+                            </ToastProvider>
+                        </ConfigProvider>
                     </Theme>
                 </RouteProvider>
             </body>

@@ -28,6 +28,7 @@ interface ConfigState {
     setUsePersonalKey: (use: boolean) => void;
     updateStatus: (provider: AIProvider) => Promise<void>;
     useTokens: (amount: number) => void;
+    syncRuntimeConfig: () => Promise<void>;
 }
 
 export const useConfigStore = create<ConfigState>()(
@@ -91,7 +92,22 @@ export const useConfigStore = create<ConfigState>()(
                 }));
             },
 
-            useTokens: () => { }
+            useTokens: () => { },
+
+            syncRuntimeConfig: async () => {
+                try {
+                    const res = await fetch("/api/config");
+                    if (res.ok) {
+                        const data = await res.json();
+                        set({
+                            provider: data.provider,
+                            modelName: data.modelName
+                        });
+                    }
+                } catch (err) {
+                    console.error("Failed to sync runtime config:", err);
+                }
+            }
         }),
         {
             name: "vibe-config-storage",
