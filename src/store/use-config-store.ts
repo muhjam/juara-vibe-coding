@@ -16,10 +16,10 @@ interface ConfigState {
     modelName: string;
     customApiKeys: Record<AIProvider, string | null>;
     usePersonalKey: boolean;
-    
+
     // Real connection status from server
     connectionStatuses: Record<AIProvider, ProviderStatus>;
-    
+
     // Actions
     setProvider: (provider: AIProvider) => void;
     setModelName: (modelName: string) => void;
@@ -27,7 +27,7 @@ interface ConfigState {
     disconnectCustomKey: (provider: AIProvider) => void;
     setUsePersonalKey: (use: boolean) => void;
     updateStatus: (provider: AIProvider) => Promise<void>;
-    useTokens: (amount: number) => void; 
+    useTokens: (amount: number) => void;
 }
 
 export const useConfigStore = create<ConfigState>()(
@@ -78,7 +78,7 @@ export const useConfigStore = create<ConfigState>()(
                 get().updateStatus(p);
             },
             setUsePersonalKey: (usePersonalKey) => set({ usePersonalKey }),
-            
+
             updateStatus: async (p) => {
                 const state = get();
                 const customKey = state.customApiKeys[p];
@@ -91,7 +91,7 @@ export const useConfigStore = create<ConfigState>()(
                 }));
             },
 
-            useTokens: () => {}
+            useTokens: () => { }
         }),
         {
             name: "vibe-config-storage",
