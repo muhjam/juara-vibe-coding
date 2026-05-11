@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, Home01, RefreshCcw01, XCircle, Zap } from "@untitledui/icons";
+import { CheckCircle, ChevronDown, Home01, RefreshCcw01, XCircle, Zap } from "@untitledui/icons";
 import { Button } from "../../components/base/buttons/button";
 import { FeaturedIcon } from "../../components/foundations/featured-icon/featured-icon";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useExamStore, useActiveExam } from "../../store/use-exam-store";
 import { cx } from "../../utils/cx";
 import { Markdown } from "../../components/shared-assets/markdown";
@@ -16,6 +16,7 @@ export const ResultScreen = () => {
     const id = params.id as string;
     const activeExam = useActiveExam();
     const { selectExam, exams, retryActiveExam } = useExamStore();
+    const [isReviewOpen, setIsReviewOpen] = useState(false);
 
     // Sync active exam with URL
     useEffect(() => {
@@ -113,12 +114,28 @@ export const ResultScreen = () => {
 
                 <hr className="border-secondary" />
 
-                {/* Question Review */}
-                <div className="flex flex-col gap-6">
-                    <h2 className="text-xl font-semibold text-primary">Question Review</h2>
+                {/* Question Review (Collapsible) */}
+                <div className="flex flex-col gap-4">
+                    <button
+                        onClick={() => setIsReviewOpen(!isReviewOpen)}
+                        className="flex w-full items-center justify-between rounded-xl border border-secondary bg-secondary/50 p-4 transition-all hover:bg-secondary"
+                    >
+                        <div className="flex flex-col items-start gap-1 text-left">
+                            <h2 className="text-lg font-semibold text-primary">Question Review</h2>
+                            <p className="text-sm text-tertiary">Check your answers and learn from your mistakes.</p>
+                        </div>
+                        <div className={cx("transition-transform duration-300", isReviewOpen ? "rotate-180" : "")}>
+                            <ChevronDown className="size-5 text-tertiary" />
+                        </div>
+                    </button>
 
-                    <div className="flex flex-col gap-4">
-                        {questions.map((q, idx) => {
+                    <div className={cx(
+                        "grid transition-all duration-500 ease-in-out",
+                        isReviewOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 overflow-hidden"
+                    )}>
+                        <div className="min-h-0">
+                            <div className="flex flex-col gap-6 py-4">
+                                {questions.map((q, idx) => {
                             const isMC = !!q.options;
                             const isWriting = q.skill.toLowerCase() === "writing";
                             const userAnswerRaw = userAnswers[q.id] || "";
@@ -212,6 +229,8 @@ export const ResultScreen = () => {
                                 </div>
                             );
                         })}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
