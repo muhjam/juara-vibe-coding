@@ -1,5 +1,6 @@
-export const AI_PROVIDER = process.env.AI_PROVIDER || "groq";
-export const AI_MODEL_NAME = process.env.AI_MODEL_NAME;
+// Server-side only (used in API routes)
+export const AI_PROVIDER = process.env.NEXT_PUBLIC_AI_PROVIDER || process.env.AI_PROVIDER;
+export const AI_MODEL_NAME = process.env.NEXT_PUBLIC_AI_MODEL_NAME || process.env.AI_MODEL_NAME;
 
 // API Keys (Server Only)
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;

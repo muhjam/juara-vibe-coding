@@ -95,6 +95,15 @@ export const useConfigStore = create<ConfigState>()(
         }),
         {
             name: "vibe-config-storage",
+            // Always override provider & model with values from .env.local
+            // This prevents stale localStorage values from taking precedence over env vars
+            merge: (persistedState: any, currentState: ConfigState) => ({
+                ...currentState,
+                ...persistedState,
+                // Env vars always win for provider and model selection
+                provider: (AI_PROVIDER as AIProvider) || persistedState?.provider || "groq",
+                modelName: AI_MODEL_NAME || persistedState?.modelName || "llama-3.3-70b-versatile",
+            }),
         }
     )
 );
