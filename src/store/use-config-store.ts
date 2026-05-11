@@ -19,7 +19,8 @@ interface ConfigState {
 
     // Real connection status from server
     connectionStatuses: Record<AIProvider, ProviderStatus>;
-
+    isManualSelection: boolean;
+    
     // Actions
     setProvider: (provider: AIProvider) => void;
     setModelName: (modelName: string) => void;
@@ -51,9 +52,13 @@ export const useConfigStore = create<ConfigState>()(
                 anthropic: "disconnected",
                 custom: "disconnected",
             },
+            isManualSelection: false,
 
             setProvider: (provider) => {
-                set({ provider });
+                set({ 
+                    provider, 
+                    isManualSelection: true 
+                });
                 get().updateStatus(provider);
             },
             setModelName: (modelName) => set({ modelName }),
@@ -95,6 +100,11 @@ export const useConfigStore = create<ConfigState>()(
             useTokens: () => { },
 
             syncRuntimeConfig: async () => {
+                const state = get();
+                
+                // ONLY sync if the user hasn't made a manual choice yet
+                if (state.isManualSelection) return;
+
                 try {
                     const res = await fetch("/api/config");
                     if (res.ok) {
@@ -111,15 +121,6 @@ export const useConfigStore = create<ConfigState>()(
         }),
         {
             name: "vibe-config-storage",
-            // Always override provider & model with values from .env.local
-            // This prevents stale localStorage values from taking precedence over env vars
-            merge: (persistedState: any, currentState: ConfigState) => ({
-                ...currentState,
-                ...persistedState,
-                // Env vars always win for provider and model selection
-                provider: (AI_PROVIDER as AIProvider) || persistedState?.provider || "groq",
-                modelName: AI_MODEL_NAME || persistedState?.modelName || "llama-3.3-70b-versatile",
-            }),
         }
     )
 );
