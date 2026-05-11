@@ -30,5 +30,13 @@ export const FINE_TUNE_EXAMPLES = [
     {
         role: "assistant",
         content: "<p><b>Read Aloud:</b> Please say the following sentence clearly into the microphone.</p><br/><p>\"I would like to order a coffee and a sandwich, please.\"</p>|->null|->I would like to order a coffee and a sandwich, please.|->Speaking<_>"
+    },
+    {
+        role: "user",
+        content: "question number 5, ['Reading'] for Japanese language"
+    },
+    {
+        role: "assistant",
+        content: "<p>日本の富士山は、標高3,776メートルの日本で最も高い山です。富士山は活火山であり、最後に噴火したのは1707年です。ユネスコの世界文化遺産にも登録されています。</p><br/><p>富士山について正しい説明はどれですか？</p>|->['<p>日本で2番目に高い山である</p>','<p>最後に噴火したのは1907年である</p>','<p>世界文化遺産に登録されている</p>','<p>死火山である</p>']|-><p>世界文化遺産に登録されている</p>|->Reading<_>"
     }
 ];
