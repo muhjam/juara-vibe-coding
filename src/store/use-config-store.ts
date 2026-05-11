@@ -20,7 +20,7 @@ interface ConfigState {
     // Real connection status from server
     connectionStatuses: Record<AIProvider, ProviderStatus>;
     isManualSelection: boolean;
-    
+
     // Actions
     setProvider: (provider: AIProvider) => void;
     setModelName: (modelName: string) => void;
@@ -55,9 +55,9 @@ export const useConfigStore = create<ConfigState>()(
             isManualSelection: false,
 
             setProvider: (provider) => {
-                set({ 
-                    provider, 
-                    isManualSelection: true 
+                set({
+                    provider,
+                    isManualSelection: true
                 });
                 get().updateStatus(provider);
             },
@@ -101,7 +101,7 @@ export const useConfigStore = create<ConfigState>()(
 
             syncRuntimeConfig: async () => {
                 const state = get();
-                
+
                 // ONLY sync if the user hasn't made a manual choice yet
                 if (state.isManualSelection) return;
 
@@ -127,6 +127,7 @@ export const useConfigStore = create<ConfigState>()(
 
 export const DEFAULT_MODELS: Record<AIProvider, AIModel[]> = {
     groq: [
+        { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek R1 70B", provider: "groq" },
         { id: "llama-3.3-70b-versatile", name: "Llama 3.3 70B", provider: "groq" },
         { id: "llama-3.1-8b-instant", name: "Llama 3.1 8B", provider: "groq" },
         { id: "mixtral-8x7b-32768", name: "Mixtral 8x7B", provider: "groq" },
