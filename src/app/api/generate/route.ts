@@ -15,8 +15,6 @@ async function callGemini(prompt: string, model: string, customKey?: string): Pr
 
     // Map legacy or shorthand IDs to correct ones
     let modelId = model.startsWith("models/") ? model.split("/")[1] : model;
-    if (modelId === "gemini-1.5-flash") modelId = "gemini-1.5-flash-latest";
-    if (modelId === "gemini-1.5-pro") modelId = "gemini-1.5-pro-latest";
 
     const contents = [
         ...FINE_TUNE_EXAMPLES.map(ex => ({
@@ -27,10 +25,10 @@ async function callGemini(prompt: string, model: string, customKey?: string): Pr
     ];
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`;
-    
+
     const res = await fetch(url, {
         method: "POST",
-        headers: { 
+        headers: {
             "Content-Type": "application/json",
             "x-goog-api-key": apiKey
         },
@@ -45,13 +43,13 @@ async function callGemini(prompt: string, model: string, customKey?: string): Pr
             }
         }),
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
         console.error("Gemini Error Detail:", JSON.stringify(data, null, 2));
         throw new Error(data.error?.message || `Gemini API error (${res.status})`);
     }
-    
+
     return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
