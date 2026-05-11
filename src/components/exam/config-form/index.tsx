@@ -170,8 +170,8 @@ export const ConfigForm = () => {
 
                 {/* Question Count */}
                 <div className="flex flex-col gap-1.5">
-                    <Label>Number of Questions</Label>
                     <Input
+                        label="Number of Questions"
                         type="number"
                         inputMode="numeric"
                         value={questionCount.toString()}
@@ -181,10 +181,8 @@ export const ConfigForm = () => {
                         }}
                         placeholder="E.g. 10"
                         icon={File06}
+                        hint="Note: Max 10 questions during Beta Version."
                     />
-                    <p className="text-xs text-tertiary italic mt-1 px-1">
-                        Note: Max 10 questions during Beta Version.
-                    </p>
                 </div>
 
                 {/* Advanced Toggle */}
