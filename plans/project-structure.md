@@ -57,7 +57,7 @@ We will use a centralized configuration in `.env` to manage AI providers securel
 ```bash
 # Provider selection: gemini | groq | openai | anthropic
 AI_PROVIDER=gemini
-AI_MODEL_NAME=gemini-1.5-flash
+AI_MODEL_NAME=gemini-3-flash-preview
 
 # API Keys
 GROQ_API_KEY=your_key_here
