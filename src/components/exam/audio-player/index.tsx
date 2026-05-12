@@ -48,7 +48,7 @@ const GOOGLE_LANG_MAP: Record<string, string> = {
     Indonesian: "id",
 };
 
-type SpeakerType = "you" | "friend" | "narrator";
+type SpeakerType = "you" | "person" | "narrator";
 
 interface Segment {
     text: string;
@@ -122,8 +122,8 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                 if (labelLower === "you") {
                     speaker = "you";
                     content = textPart;
-                } else if (labelLower === "friend") {
-                    speaker = "friend";
+                } else if (labelLower === "person") {
+                    speaker = "person";
                     content = textPart;
                 } else if (labelLower === "narrator") {
                     speaker = "narrator";
@@ -174,7 +174,7 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
         const chunk = segment.chunks[chunkIndex];
         const langCode = GOOGLE_LANG_MAP[language] || "en";
         // Map YOU -> female voice, FRIEND -> narrator voice (kedua suara wanita, tapi karakter berbeda)
-        const voiceRole = segment.speaker === "you" ? "female" : segment.speaker === "friend" ? "narrator" : "narrator";
+        const voiceRole = segment.speaker === "you" ? "female" : segment.speaker === "person" ? "narrator" : "narrator";
         const url = getGoogleTTSUrl(chunk, langCode, voiceRole);
 
         if (audioRef.current) {
@@ -290,11 +290,11 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                             {isPlaying && (
                                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ${segmentsRef.current[currentSegmentIndex]?.speaker === "you"
                                         ? "bg-teal-600"
-                                        : segmentsRef.current[currentSegmentIndex]?.speaker === "friend"
+                                        : segmentsRef.current[currentSegmentIndex]?.speaker === "person"
                                             ? "bg-orange-500"
                                             : "bg-slate-500"
                                     }`}>
-                                    {segmentsRef.current[currentSegmentIndex]?.speaker === "you" ? "You" : segmentsRef.current[currentSegmentIndex]?.speaker === "friend" ? "Friend" : "Narrator"}
+                                    {segmentsRef.current[currentSegmentIndex]?.speaker === "you" ? "You" : segmentsRef.current[currentSegmentIndex]?.speaker === "person" ? "Person" : "Narrator"}
                                 </span>
                             )}
                         </div>
