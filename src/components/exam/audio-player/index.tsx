@@ -5,6 +5,7 @@ import { RefreshCw01, VolumeMax, Zap } from "@untitledui/icons";
 import { PlayIcon, PauseIcon } from "@/components/base/video-player/icons";
 import { Button } from "@/components/base/buttons/button";
 import { getGoogleTTSUrl, splitTextForTTS } from "@/utils/google-tts";
+import { BadgeWithDot } from "@/components/base/badges/badges";
 
 interface AudioPlayerProps {
     text: string;
@@ -118,7 +119,7 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                 const textPart = speakerMatch[2].trim();
                 const labelLower = label.toLowerCase();
 
-                // DETEKSI DISIPLIN: Hanya mendukung YOU, FRIEND, NARRATOR
+                // DETEKSI DISIPLIN: Hanya mendukung YOU, PERSON, NARRATOR
                 if (labelLower === "you") {
                     speaker = "you";
                     content = textPart;
@@ -173,7 +174,7 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
 
         const chunk = segment.chunks[chunkIndex];
         const langCode = GOOGLE_LANG_MAP[language] || "en";
-        // Map YOU -> female voice, FRIEND -> narrator voice (kedua suara wanita, tapi karakter berbeda)
+        // Map YOU -> female voice, PERSON -> narrator voice (kedua suara wanita, tapi karakter berbeda)
         const voiceRole = segment.speaker === "you" ? "female" : segment.speaker === "person" ? "narrator" : "narrator";
         const url = getGoogleTTSUrl(chunk, langCode, voiceRole);
 
@@ -274,8 +275,18 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
         setIsPlaying(true);
     };
 
+    // Helper: compute badge props
+    const speakerBadge = (() => {
+        const spk = segmentsRef.current[currentSegmentIndex]?.speaker;
+        return {
+            color: (spk === "you" ? "success" : spk === "person" ? "orange" : "gray") as "success" | "orange" | "gray",
+            label: spk === "you" ? "You" : spk === "person" ? "Person" : "Narrator",
+        };
+    })();
+
     return (
         <div className="flex flex-col gap-4 rounded-xl border border-brand-200 bg-brand-soft/10 p-6">
+            {/* Header Row */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div className="flex size-12 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg">
@@ -287,14 +298,12 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                             <span className="text-xs text-brand-600">
                                 Neural Voice ({language})
                             </span>
+                            {/* Badge: hanya tampil di header pada mode desktop (md+) */}
                             {isPlaying && (
-                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ${segmentsRef.current[currentSegmentIndex]?.speaker === "you"
-                                        ? "bg-teal-600"
-                                        : segmentsRef.current[currentSegmentIndex]?.speaker === "person"
-                                            ? "bg-orange-500"
-                                            : "bg-slate-500"
-                                    }`}>
-                                    {segmentsRef.current[currentSegmentIndex]?.speaker === "you" ? "You" : segmentsRef.current[currentSegmentIndex]?.speaker === "person" ? "Person" : "Narrator"}
+                                <span className="hidden md:inline-flex">
+                                    <BadgeWithDot size="sm" color={speakerBadge.color}>
+                                        {speakerBadge.label}
+                                    </BadgeWithDot>
                                 </span>
                             )}
                         </div>
@@ -302,6 +311,7 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                 </div>
             </div>
 
+            {/* Controls Row — Desktop: tombol + progress dalam satu baris */}
             <div className="flex items-center gap-4">
                 <Button
                     size="md"
@@ -320,6 +330,22 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                     onClick={restart}
                 />
 
+                {/* Progress bar: tampil di sini hanya pada desktop (md+) */}
+                <div className="hidden md:flex flex-1 overflow-hidden rounded-full bg-brand-200 h-2">
+                    <div
+                        className="bg-brand-600 h-full transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                    />
+                </div>
+            </div>
+
+            {/* Mobile Only: Badge + Progress bar di baris paling bawah */}
+            <div className="flex md:hidden items-center gap-3">
+                {isPlaying && (
+                    <BadgeWithDot size="sm" color={speakerBadge.color}>
+                        {speakerBadge.label}
+                    </BadgeWithDot>
+                )}
                 <div className="flex-1 overflow-hidden rounded-full bg-brand-200 h-2">
                     <div
                         className="bg-brand-600 h-full transition-all duration-300"
