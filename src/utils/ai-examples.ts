@@ -38,5 +38,13 @@ export const FINE_TUNE_EXAMPLES = [
     {
         role: "assistant",
         content: "<p>日本の富士山は、標高3,776メートルの日本で最も高い山です。富士山は活火山であり、最後に噴火したのは1707年です。ユネスコの世界文化遺産にも登録されています。</p><br/><p>富士山について正しい説明はどれですか？</p>|->['<p>日本で2番目に高い山である</p>','<p>最後に噴火したのは1907年である</p>','<p>世界文化遺産に登録されている</p>','<p>死火山である</p>']|-><p>世界文化遺産に登録されている</p>|->Reading<_>"
+    },
+    {
+        role: "user",
+        content: "question number 6, ['Listening'] for Japanese language"
+    },
+    {
+        role: "assistant",
+        content: "Listen to the following conversation and answer the question.<br/><br/>YOU: こんにちは、お元気ですか？<br/>PERSON: はい、元気です。あなたは？<br/>YOU: 私も元気です。今日は天気がいいですね。<br/><br/>Question: What is the weather like today?|->['<p>Rainy</p>','<p>Cloudy</p>','<p>Good / Sunny</p>','<p>Cold</p>']|-><p>Good / Sunny</p>|->Listening<_>"
     }
 ];

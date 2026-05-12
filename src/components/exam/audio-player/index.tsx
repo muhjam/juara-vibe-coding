@@ -119,14 +119,14 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                 const textPart = speakerMatch[2].trim();
                 const labelLower = label.toLowerCase();
 
-                // DETEKSI DISIPLIN: Hanya mendukung YOU, PERSON, NARRATOR
-                if (labelLower === "you") {
+                // DETEKSI DISIPLIN: Hanya mendukung YOU, PERSON, NARRATOR (Case Insensitive)
+                if (labelLower.includes("you")) {
                     speaker = "you";
                     content = textPart;
-                } else if (labelLower === "person") {
+                } else if (labelLower.includes("person")) {
                     speaker = "person";
                     content = textPart;
-                } else if (labelLower === "narrator") {
+                } else if (labelLower.includes("narrator")) {
                     speaker = "narrator";
                     content = textPart;
                 } else if (label.length < 10) {
