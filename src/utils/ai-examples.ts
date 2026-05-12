@@ -13,7 +13,7 @@ export const FINE_TUNE_EXAMPLES = [
     },
     {
         role: "assistant",
-        content: "Listen to the following conversation and answer the question.<br/><br/>Man: Hello, I would like to reserve a table for two people tonight at 7 p.m.<br/>Woman: Certainly. May I have your name, please?<br/>Man: My name is John Smith.<br/><br/>Question: What is the man trying to do?|->['<p>Order food</p>','<p>Make a reservation</p>','<p>Cancel a booking</p>','<p>Ask for directions</p>']|-><p>Make a reservation</p>|->Listening<_>"
+        content: "Listen to the following conversation and answer the question.<br/><br/>YOU: Hello, I would like to reserve a table for two people tonight at 7 p.m.<br/>FRIEND: Certainly. May I have your name, please?<br/>YOU: My name is John Smith.<br/><br/>Question: What are you trying to do?|->['<p>Order food</p>','<p>Make a reservation</p>','<p>Cancel a booking</p>','<p>Ask for directions</p>']|-><p>Make a reservation</p>|->Listening<_>"
     },
     {
         role: "user",

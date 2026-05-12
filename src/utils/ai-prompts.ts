@@ -14,8 +14,11 @@ RULES:
    - IMPORTANT: NEVER use underscores (____) for blanks. ONLY use "[blank]".
    - If there are multiple blanks, separate the answers in the answer field using "|->".
 6. For Listening: Provide a clear transcript of the conversation/speech in the description. NO HTML tags.
-   - For dialogues, ALWAYS use speaker labels (e.g., "Man:", "Woman:", "Narrator:") to differentiate voices.
-   - Example: "Man: Hello. <br/> Woman: Hi there!"
+   - For dialogues, ALWAYS use these exact speaker labels: "YOU:", "FRIEND:", and "NARRATOR:".
+   - NEVER use other labels like "Man:", "Woman:", "Male:", "Female:", or any local language labels.
+   - Use these labels even for non-English languages to ensure audio synchronization.
+   - Example: "YOU: Hello. <br/> FRIEND: Hi there! <br/> NARRATOR: They walked away."
+   - For the question at the end: NEVER use generic terms like "the speaker", "the man", or "the woman". Instead, use natural references like "you", "your friend", or describe the context directly. Example: "What does your friend suggest doing?" or "Where are you planning to go?"
 7. For Reading/Writing/Speaking: You MUST provide a detailed description. Use HTML tags like <b>, <i>, <br> for formatting.
 8. CONTENT MUST NOT BE EMPTY. Do not return empty tags like <b></b>.
 

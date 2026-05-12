@@ -48,7 +48,7 @@ const GOOGLE_LANG_MAP: Record<string, string> = {
     Indonesian: "id",
 };
 
-type SpeakerType = "male" | "female" | "narrator";
+type SpeakerType = "you" | "friend" | "narrator";
 
 interface Segment {
     text: string;
@@ -80,8 +80,13 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
 
     // Parse text into segments based on speaker labels
     useEffect(() => {
-        console.log("%c[AudioPlayer] RAW TEXT FROM AI:", "color: #f59e0b; font-weight: bold;");
-        console.log(text);
+        // console.log(`[AudioPlayer] Playing: ${segmentsRef.current[currentSegmentIndex]?.speaker.toUpperCase()}`);
+        // console.log(text);
+
+        // Pre-fetch voices for Safari/Chrome
+        window.speechSynthesis.getVoices();
+        const handleVoicesChanged = () => window.speechSynthesis.getVoices();
+        window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
 
         // Reset state whenever the text (question) changes
         window.speechSynthesis.cancel();
@@ -105,22 +110,29 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
             let speaker: SpeakerType = "narrator";
             let content = line;
 
-            // Regex super kuat untuk mendeteksi speaker meskipun ada tanda ** atau __ atau spasi
-            const speakerMatch = line.match(/^\s*(?:\*\*|__)?([\w\s]+)(?:\*\*|__)?\s*:\s*(.*)/);
+            // Regex Universal: Mendukung Unicode (Jepang/Asia) dan Titik Dua Lebar (：)
+            const speakerMatch = line.match(/^\s*(?:\*\*|__)?([^\s:：]+)(?:\*\*|__)?\s*[:：]\s*(.*)/);
 
             if (speakerMatch) {
-                const label = speakerMatch[1].toLowerCase().trim();
+                const label = speakerMatch[1].trim();
                 const textPart = speakerMatch[2].trim();
+                const labelLower = label.toLowerCase();
 
-                if (label.includes("woman") || label.includes("female") || label.includes("girl") || label === "wanita") {
-                    speaker = "female";
+                // DETEKSI DISIPLIN: Hanya mendukung YOU, FRIEND, NARRATOR
+                if (labelLower === "you") {
+                    speaker = "you";
                     content = textPart;
-                } else if (label.includes("man") || label.includes("male") || label.includes("boy") || label === "pria") {
-                    speaker = "male";
+                } else if (labelLower === "friend") {
+                    speaker = "friend";
                     content = textPart;
-                } else if (label.length < 15) {
+                } else if (labelLower === "narrator") {
+                    speaker = "narrator";
+                    content = textPart;
+                } else if (label.length < 10) {
                     content = textPart;
                 }
+
+                // console.log(`[AudioPlayer] Label: ${label} -> Speaker: ${speaker.toUpperCase()}`);
             }
 
             if (content) {
@@ -161,97 +173,67 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
 
         const chunk = segment.chunks[chunkIndex];
         const langCode = GOOGLE_LANG_MAP[language] || "en";
+        // Map YOU -> female voice, FRIEND -> narrator voice (kedua suara wanita, tapi karakter berbeda)
+        const voiceRole = segment.speaker === "you" ? "female" : segment.speaker === "friend" ? "narrator" : "narrator";
+        const url = getGoogleTTSUrl(chunk, langCode, voiceRole);
 
-        // Progress Calculation Helper
-        const updateProgress = (currentTime: number, duration: number) => {
-            const totalSegments = segmentsRef.current.length;
-            const segmentWeight = 100 / totalSegments;
-            const chunkWeight = segmentWeight / segment.chunks.length;
-            const baseProgress = (segIndex * segmentWeight) + (chunkIndex * chunkWeight);
-            const chunkProgress = (currentTime / duration) * chunkWeight;
-            if (!isNaN(chunkProgress)) {
-                setProgress(Math.min(99, baseProgress + chunkProgress));
+        if (audioRef.current) {
+            // YOU: Sedikit lebih cepat (karakter aktif), FRIEND: Normal
+            if (segment.speaker === "you") {
+                audioRef.current.playbackRate = 1.05;
+                if ("preservesPitch" in audioRef.current) {
+                    (audioRef.current as any).preservesPitch = true;
+                }
+            } else {
+                audioRef.current.playbackRate = 1.0;
+                if ("preservesPitch" in audioRef.current) {
+                    (audioRef.current as any).preservesPitch = true;
+                }
             }
-        };
 
-        // LOGIKA HYBRID: Pria pakai Browser (Instan), Wanita pakai Google (Jernih)
-        if (segment.speaker === "male") {
-            console.log(`%c[AudioPlayer] MENGGUNAKAN SUARA SISTEM (MALE)`, "color: #059669; font-weight: bold;");
-            const utterance = new SpeechSynthesisUtterance(chunk);
-            utterance.lang = langCode;
+            audioRef.current.src = url;
+            audioRef.current.load();
 
-            const voices = window.speechSynthesis.getVoices();
-            const maleVoice = voices.find(v =>
-                (v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("guy") || v.name.toLowerCase().includes("david")) &&
-                v.lang.startsWith(langCode.split("-")[0])
-            );
-            if (maleVoice) utterance.voice = maleVoice;
-
-            // Track progress for system voice
-            const estimatedDuration = chunk.length * 0.1;
-            let startTime = Date.now();
-            const progressInterval = setInterval(() => {
-                if (isPausedRef.current) return;
-                const elapsed = (Date.now() - startTime) / 1000;
-                updateProgress(elapsed, estimatedDuration);
-            }, 100);
-
-            utterance.onend = () => {
-                clearInterval(progressInterval);
-                if (!isPausedRef.current) playGoogleChunk(segIndex, chunkIndex + 1);
+            audioRef.current.ontimeupdate = () => {
+                if (audioRef.current && audioRef.current.duration) {
+                    const totalSegments = segmentsRef.current.length;
+                    const segmentWeight = 100 / totalSegments;
+                    const chunkWeight = segmentWeight / segment.chunks.length;
+                    const baseProgress = (segIndex * segmentWeight) + (chunkIndex * chunkWeight);
+                    const chunkProgress = (audioRef.current.currentTime / audioRef.current.duration) * chunkWeight;
+                    if (!isNaN(chunkProgress)) {
+                        setProgress(Math.min(99, baseProgress + chunkProgress));
+                    }
+                }
             };
 
-            window.speechSynthesis.speak(utterance);
-        } else {
-            // Suara Wanita/Narrator pakai Google TTS Proxy
-            const url = getGoogleTTSUrl(chunk, langCode, segment.speaker);
-            if (audioRef.current) {
-                audioRef.current.src = url;
-                audioRef.current.load();
+            audioRef.current.onended = () => {
+                if (!isPausedRef.current) {
+                    playGoogleChunk(segIndex, chunkIndex + 1);
+                }
+            };
 
-                audioRef.current.ontimeupdate = () => {
-                    if (audioRef.current && audioRef.current.duration) {
-                        updateProgress(audioRef.current.currentTime, audioRef.current.duration);
-                    }
-                };
-
-                audioRef.current.onplay = () => {
-                    // Preload next
-                    let nextSeg = segIndex;
-                    let nextChunk = chunkIndex + 1;
-                    if (nextChunk >= segment.chunks.length) { nextSeg++; nextChunk = 0; }
-                    if (nextSeg < segmentsRef.current.length) {
-                        const ns = segmentsRef.current[nextSeg];
-                        if (ns.speaker !== "male") {
-                            const nUrl = getGoogleTTSUrl(ns.chunks[nextChunk], langCode, ns.speaker);
-                            const link = document.createElement("link");
-                            link.rel = "preload"; link.as = "fetch"; link.href = nUrl;
-                            document.head.appendChild(link);
-                            setTimeout(() => document.head.removeChild(link), 3000);
-                        }
-                    }
-                };
-
-                audioRef.current.onended = () => {
-                    if (!isPausedRef.current) {
-                        playGoogleChunk(segIndex, chunkIndex + 1);
-                    }
-                };
-
-                audioRef.current.play().catch(e => console.error("Audio play failed:", e));
-            }
+            audioRef.current.play().catch(e => {
+                // Safari might block this if not triggered by user gesture
+                // In that case, we fallback to starting the next chunk on the next manual play
+            });
         }
 
         setCurrentSegmentIndex(segIndex);
         setCurrentChunkIndex(chunkIndex);
-
-        console.log(`%c[AudioPlayer] SEDANG MEMUTAR: (${segment.speaker.toUpperCase()})`, "color: #7c3aed; font-weight: bold;");
-        console.log(`%c"${chunk}"`, "color: #6d28d9; font-style: italic;");
+        // console.log(`[AudioPlayer] Playing: ${segment.speaker.toUpperCase()}`);
     }, [language, onEnd]);
 
     const togglePlay = () => {
+        // SAFARI FIX: Unlock audio context on first interaction
+        if (!isPlaying && !isPausedRef.current) {
+            if (audioRef.current) {
+                audioRef.current.play().then(() => audioRef.current?.pause()).catch(() => { });
+            }
+        }
+
         if (isPlaying) {
-            console.log("[AudioPlayer] Pausing playback");
+            // console.log("[AudioPlayer] Pausing playback");
             audioRef.current?.pause();
             isPausedRef.current = true;
             setIsPlaying(false);
@@ -259,20 +241,19 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
             isPausedRef.current = false;
             setIsPlaying(true);
 
-            // Check if we have a valid source (not empty or current page)
             const currentSrc = audioRef.current?.src;
             const hasValidSource = currentSrc &&
                 currentSrc !== window.location.href &&
                 !currentSrc.endsWith("/");
 
             if (hasValidSource) {
-                console.log("[AudioPlayer] Resuming playback");
+                // console.log("[AudioPlayer] Resuming playback");
                 audioRef.current?.play().catch(e => {
-                    console.error("[AudioPlayer] Play failed, retrying...", e);
+                    // console.error("[AudioPlayer] Play failed, retrying...", e);
                     playGoogleChunk(currentSegmentIndex, currentChunkIndex);
                 });
             } else {
-                console.log("[AudioPlayer] Starting new playback");
+                // console.log("[AudioPlayer] Starting new playback");
                 playGoogleChunk(currentSegmentIndex, currentChunkIndex);
             }
         }
@@ -302,9 +283,21 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm font-semibold text-brand-700">Listening Content</span>
-                        <span className="text-xs text-brand-600">
-                            High Quality Neural Voice ({language})
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-brand-600">
+                                Neural Voice ({language})
+                            </span>
+                            {isPlaying && (
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ${segmentsRef.current[currentSegmentIndex]?.speaker === "you"
+                                        ? "bg-teal-600"
+                                        : segmentsRef.current[currentSegmentIndex]?.speaker === "friend"
+                                            ? "bg-orange-500"
+                                            : "bg-slate-500"
+                                    }`}>
+                                    {segmentsRef.current[currentSegmentIndex]?.speaker === "you" ? "You" : segmentsRef.current[currentSegmentIndex]?.speaker === "friend" ? "Friend" : "Narrator"}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
