@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
         const activeProvider = provider || "groq";
         const activeModel = model || "llama-3.3-70b-versatile";
 
-        const userPrompt = `question number ${range}, ['${skill}']${language ? ` for ${language} language` : ""}`;
+        const userPrompt = `Generate exactly ${range} questions for the ['${skill}'] skill${language ? ` in ${language} language` : ""}. Ensure you follow the CSV format specified in the system prompt.`;
         let rawResponse = "";
 
         switch (activeProvider) {
