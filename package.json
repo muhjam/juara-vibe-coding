@@ -10,6 +10,7 @@
     "dependencies": {
         "@internationalized/date": "^3.10.0",
         "@react-aria/utils": "^3.31.0",
+        "@react-aria/i18n": "^3.12.5",
         "@react-email/components": "^0.4.0",
         "@react-email/tailwind": "^1.2.2",
         "@react-stately/utils": "^3.10.8",
