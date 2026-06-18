@@ -6,12 +6,12 @@ import { ChartLegendContent, ChartTooltipContent } from "@/components/applicatio
 import { cx } from "@/utils/cx";
 
 interface CustomRadarChartTickProps {
-    payload: { value: string };
-    x: number;
-    y: number;
-    textAnchor: "start" | "middle" | "end" | "inherit";
-    stroke: string;
-    radius: number;
+    payload: any;
+    x: any;
+    y: any;
+    textAnchor: any;
+    stroke: any;
+    radius?: any;
 }
 
 export const CustomRadarChartTick = ({ payload, x, y, textAnchor, stroke, radius }: CustomRadarChartTickProps) => {
@@ -38,8 +38,7 @@ export const CustomRadarChartTick = ({ payload, x, y, textAnchor, stroke, radius
             <text
                 ref={textRef}
                 x={x}
-                y={y + 5}
-                radius={radius}
+                y={Number(y) + 5}
                 stroke={stroke}
                 textAnchor={textAnchor}
                 className="recharts-text recharts-polar-angle-axis-tick-value"
