@@ -19,12 +19,12 @@ RULES:
    - IMPORTANT: NEVER use underscores (____) for blanks. ONLY use "[blank]".
    - If there are multiple blanks, separate the answers in the answer field using "|->".
 6. For Listening: Provide a clear transcript of the conversation/speech in the description.
-   - CRITICAL: ALWAYS use these exact speaker labels in English: "YOU:", "PERSON:", and "NARRATOR:".
-   - NEVER translate these labels into the target language (e.g., NEVER use "あなた:" for Japanese or "Anda:" for Indonesian). 
+   - CRITICAL: ALWAYS use these exact speaker labels in English: "MALE:", "FEMALE:", and "NARRATOR:".
+   - NEVER translate these labels into the target language (e.g., NEVER use "男性:" for Japanese or "Pria:" for Indonesian). 
    - ALWAYS use a standard colon ":" after the label.
-   - NEVER use other labels like "Man:", "Woman:", "Male:", "Female:", "Friend:", or any local language labels.
-   - Example (Japanese): "YOU: こんにちは。 <br/> PERSON: こんにちは！"
-   - For the question at the end: NEVER use generic terms like "the speaker", "the man", or "the woman". Instead, use natural references like "you", "the person", or describe the context directly. Example: "What does the person suggest doing?" or "Where are you planning to go?"
+   - NEVER use other labels like "Man:", "Woman:", "You:", "Person:", "Friend:", or any local language labels.
+   - Example (Japanese): "MALE: こんにちは。 <br/> FEMALE: こんにちは！"
+   - For the question at the end: NEVER use generic terms like "the speaker". Instead, use natural references like "the man", "the woman", or describe the context directly. Example: "What does the woman suggest doing?" or "Where is the man planning to go?"
 7. For Reading/Writing/Speaking: You MUST provide a detailed description. Use HTML tags like <b>, <i>, <br> for formatting.
 8. CONTENT MUST NOT BE EMPTY. Do not return empty tags like <b></b>.
 

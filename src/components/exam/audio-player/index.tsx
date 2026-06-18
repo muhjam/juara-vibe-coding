@@ -49,7 +49,7 @@ const GOOGLE_LANG_MAP: Record<string, string> = {
     Indonesian: "id",
 };
 
-type SpeakerType = "you" | "person" | "narrator";
+type SpeakerType = "male" | "female" | "narrator";
 
 interface Segment {
     text: string;
@@ -119,12 +119,12 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
                 const textPart = speakerMatch[2].trim();
                 const labelLower = label.toLowerCase();
 
-                // DETEKSI DISIPLIN: Hanya mendukung YOU, PERSON, NARRATOR (Case Insensitive)
-                if (labelLower.includes("you")) {
-                    speaker = "you";
+                // DETEKSI DISIPLIN: Hanya mendukung MALE, FEMALE, NARRATOR (Case Insensitive)
+                if (labelLower.includes("female")) {
+                    speaker = "female";
                     content = textPart;
-                } else if (labelLower.includes("person")) {
-                    speaker = "person";
+                } else if (labelLower.includes("male")) {
+                    speaker = "male";
                     content = textPart;
                 } else if (labelLower.includes("narrator")) {
                     speaker = "narrator";
@@ -174,13 +174,13 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
 
         const chunk = segment.chunks[chunkIndex];
         const langCode = GOOGLE_LANG_MAP[language] || "en";
-        // Map YOU -> female voice, PERSON -> narrator voice (kedua suara wanita, tapi karakter berbeda)
-        const voiceRole = segment.speaker === "you" ? "female" : segment.speaker === "person" ? "narrator" : "narrator";
+        // Map speaker role to voice role
+        const voiceRole = segment.speaker;
         const url = getGoogleTTSUrl(chunk, langCode, voiceRole);
 
         if (audioRef.current) {
-            // YOU: Sedikit lebih cepat (karakter aktif), FRIEND: Normal
-            if (segment.speaker === "you") {
+            // FEMALE: Sedikit lebih cepat (karakter aktif), MALE: Normal
+            if (segment.speaker === "female") {
                 audioRef.current.playbackRate = 1.05;
                 if ("preservesPitch" in audioRef.current) {
                     (audioRef.current as any).preservesPitch = true;
@@ -279,8 +279,8 @@ export const AudioPlayer = ({ text, language = "English", onEnd }: AudioPlayerPr
     const speakerBadge = (() => {
         const spk = segmentsRef.current[currentSegmentIndex]?.speaker;
         return {
-            color: (spk === "you" ? "success" : spk === "person" ? "orange" : "gray") as "success" | "orange" | "gray",
-            label: spk === "you" ? "You" : spk === "person" ? "Person" : "Narrator",
+            color: (spk === "female" ? "success" : spk === "male" ? "orange" : "gray") as "success" | "orange" | "gray",
+            label: spk === "female" ? "Female" : spk === "male" ? "Male" : "Narrator",
         };
     })();
 

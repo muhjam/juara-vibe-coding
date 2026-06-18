@@ -13,7 +13,7 @@ export const FINE_TUNE_EXAMPLES = [
     },
     {
         role: "assistant",
-        content: "Listen to the following conversation and answer the question.<br/><br/>YOU: Hello, I would like to reserve a table for two people tonight at 7 p.m.<br/>PERSON: Certainly. May I have your name, please?<br/>YOU: My name is John Smith.<br/><br/>Question: What are you trying to do?|->['<p>Order food</p>','<p>Make a reservation</p>','<p>Cancel a booking</p>','<p>Ask for directions</p>']|-><p>Make a reservation</p>|->Listening<_>"
+        content: "Listen to the following conversation and answer the question.<br/><br/>MALE: Hello, I would like to reserve a table for two people tonight at 7 p.m.<br/>FEMALE: Certainly. May I have your name, please?<br/>MALE: My name is John Smith.<br/><br/>Question: What is the man trying to do?|->['<p>Order food</p>','<p>Make a reservation</p>','<p>Cancel a booking</p>','<p>Ask for directions</p>']|-><p>Make a reservation</p>|->Listening<_>"
     },
     {
         role: "user",
@@ -45,6 +45,6 @@ export const FINE_TUNE_EXAMPLES = [
     },
     {
         role: "assistant",
-        content: "Listen to the following conversation and answer the question.<br/><br/>YOU: こんにちは、お元気ですか？<br/>PERSON: はい、元気です。あなたは？<br/>YOU: 私も元気です。今日は天気がいいですね。<br/><br/>Question: What is the weather like today?|->['<p>Rainy</p>','<p>Cloudy</p>','<p>Good / Sunny</p>','<p>Cold</p>']|-><p>Good / Sunny</p>|->Listening<_>"
+        content: "Listen to the following conversation and answer the question.<br/><br/>MALE: こんにちは、お元気ですか？<br/>FEMALE: はい、元気です。あなたは？<br/>MALE: 私も元気です。今日は天気がいいですね。<br/><br/>Question: What is the weather like today?|->['<p>Rainy</p>','<p>Cloudy</p>','<p>Good / Sunny</p>','<p>Cold</p>']|-><p>Good / Sunny</p>|->Listening<_>"
     }
 ];
