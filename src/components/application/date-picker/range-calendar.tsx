@@ -22,10 +22,21 @@ import { CalendarCell } from "./cell";
 import { DateInput } from "./date-input";
 
 export const RangeCalendarContextProvider = ({ children }: PropsWithChildren) => {
-    const [value, onChange] = useState<{ start: DateValue; end: DateValue } | null>(null);
-    const [focusedValue, onFocusChange] = useState<DateValue | undefined>();
+    const [value, setValue] = useState<{ start: DateValue; end: DateValue } | null>(null);
+    const [focusedValue, setFocusedValue] = useState<DateValue | undefined>();
 
-    return <RangeCalendarContext.Provider value={{ value, onChange, focusedValue, onFocusChange }}>{children}</RangeCalendarContext.Provider>;
+    return (
+        <RangeCalendarContext.Provider
+            value={{
+                value,
+                onChange: (v) => setValue(v as { start: DateValue; end: DateValue } | null),
+                focusedValue,
+                onFocusChange: (v) => setFocusedValue(v as DateValue | undefined),
+            }}
+        >
+            {children}
+        </RangeCalendarContext.Provider>
+    );
 };
 
 const RangeCalendarTitle = ({ part }: { part: "start" | "end" }) => {

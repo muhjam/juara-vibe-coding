@@ -116,7 +116,7 @@ export const DateRangePicker = ({ value: valueProp, defaultValue, onChange, onAp
                             <div className="flex flex-col">
                                 <RangeCalendar
                                     focusedValue={focusedValue}
-                                    onFocusChange={setFocusedValue}
+                                    onFocusChange={(v) => setFocusedValue(v)}
                                     highlightedDates={highlightedDates}
                                     presets={{
                                         lastWeek: presets.lastWeek,
