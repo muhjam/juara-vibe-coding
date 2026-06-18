@@ -106,6 +106,17 @@ export const PlaygroundView = () => {
             Japanese: "ja-JP",
             Korean: "ko-KR",
             French: "fr-FR",
+            Spanish: "es-ES",
+            Mandarin: "zh-CN",
+            Arabic: "ar-SA",
+            German: "de-DE",
+            Italian: "it-IT",
+            Portuguese: "pt-BR",
+            Russian: "ru-RU",
+            Hindi: "hi-IN",
+            Sundanese: "id-ID",
+            Javanese: "id-ID",
+            Indonesian: "id-ID",
         };
         utterance.lang = langMap[config?.language] || "en-US";
         utterance.onstart = () => setIsPlaying(true);
@@ -132,7 +143,25 @@ export const PlaygroundView = () => {
             const recognition = new SpeechRecognition();
             recognitionRef.current = recognition;
             
-            recognition.lang = config?.language === "Japanese" ? "ja-JP" : "en-US";
+            const recognitionLangMap: Record<string, string> = {
+                English: "en-US",
+                Japanese: "ja-JP",
+                Korean: "ko-KR",
+                French: "fr-FR",
+                Spanish: "es-ES",
+                Mandarin: "zh-CN",
+                Arabic: "ar-SA",
+                German: "de-DE",
+                Italian: "it-IT",
+                Portuguese: "pt-BR",
+                Russian: "ru-RU",
+                Hindi: "hi-IN",
+                Sundanese: "id-ID",
+                Javanese: "id-ID",
+                Indonesian: "id-ID",
+            };
+            
+            recognition.lang = recognitionLangMap[config?.language] || "en-US";
             recognition.onresult = (event: any) => {
                 const transcript = event.results[0][0].transcript;
                 setAnswers(prev => ({ ...prev, [currentIndex]: transcript }));

@@ -32,6 +32,11 @@ export async function POST(req: NextRequest) {
                 "Italian": "it",
                 "Portuguese": "pt",
                 "Russian": "ru",
+                "Arabic": "ar",
+                "Hindi": "hi",
+                "Sundanese": "id",
+                "Javanese": "id",
+                "Indonesian": "id",
             };
             const langCode = langMap[language] || "en";
             groqFormData.append("language", langCode);
